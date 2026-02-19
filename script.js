@@ -31,7 +31,7 @@ const INTERNS = [
     id: 1,
     name: "Shuja Haider",
     username: "shuja.haider@aioapp.com",
-    password: "shuja1314",
+    password: "shuja1319",
   },
   {
     id: 2,
