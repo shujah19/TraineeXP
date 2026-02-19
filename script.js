@@ -31,7 +31,7 @@
           id: 1,
           name: "Shuja Haider",
           username: "shuja.haider@aioapp.com",
-          password: "shuja1214",
+          password: "shuja1215",
         },
         {
           id: 2,
@@ -1702,4 +1702,5 @@
           document.getElementById("loadingOverlay").classList.add("hidden");
           document.getElementById("loginScreen").classList.add("active");
         }, 800);
+
       });
