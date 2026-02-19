@@ -27,72 +27,17 @@ async function fbWrite(data) {
 // ║                CONSTANTS                         ║
 // ╚══════════════════════════════════════════════════╝
 const INTERNS = [
-  {
-    id: 1,
-    name: "Shuja Haider",
-    username: "shuja.haider@aioapp.com",
-    password: "shuja1214",
-  },
-  {
-    id: 2,
-    name: "Aamir Ali",
-    username: "aamir.ali@aioapp.com",
-    password: "124654",
-  },
-  {
-    id: 3,
-    name: "Ali Jee",
-    username: "ali.jee@aioapp.com",
-    password: "635737",
-  },
-  {
-    id: 4,
-    name: "Huzaifa Akbar",
-    username: "huzaifa.akbar@aioapp.com",
-    password: "173592",
-  },
-  {
-    id: 5,
-    name: "Qasim Abbas",
-    username: "qasim.abbas@aioapp.com",
-    password: "255362",
-  },
-  {
-    id: 6,
-    name: "Tahir Ali",
-    username: "tahir.ali@aioapp.com",
-    password: "635644",
-  },
-  {
-    id: 7,
-    name: "Aizaz Ali",
-    username: "aizaz.ali@aioapp.com",
-    password: "783464",
-  },
-  {
-    id: 8,
-    name: "Hamza Asghar",
-    username: "hamza.asghar@aioapp.com",
-    password: "934843",
-  },
-  {
-    id: 9,
-    name: "Jaffar Ali",
-    username: "jaffar.ali@aioapp.com",
-    password: "894356",
-  },
-  {
-    id: 10,
-    name: "Kazim Ali",
-    username: "kazim.ali@aioapp.com",
-    password: "874355",
-  },
-  {
-    id: 11,
-    name: "Asif Ali",
-    username: "asif.ali@aioapp.com",
-    password: "425668",
-  },
+  { id: 1, name: "Shuja Haider", username: "shuja.haider@aioapp.com", password: "shuja1214" },
+  { id: 2, name: "Aamir Ali", username: "aamir", password: "aamir123" },
+  { id: 3, name: "Ali Jee", username: "ali", password: "ali123" },
+  { id: 4, name: "Huzaifa Akbar", username: "huzaifa", password: "huzaifa123" },
+  { id: 5, name: "Qasim Abbas", username: "qasim", password: "qasim123" },
+  { id: 6, name: "Tahir Ali", username: "tahir", password: "tahir123" },
+  { id: 7, name: "Aizaz Ali", username: "aizaz", password: "aizaz123" },
+  { id: 8, name: "Hamza Asghar", username: "hamza", password: "hamza123" },
+  { id: 9, name: "Jaffar Ali", username: "jaffar", password: "jaffar123" },
+  { id: 10, name: "Kazim Ali", username: "kazim", password: "kazim123" },
+  { id: 11, name: "Asif Ali", username: "asif", password: "asif123" },
   {
     id: 99,
     name: "Admin",
@@ -313,8 +258,53 @@ function doLogout() {
 }
 
 // ╔══════════════════════════════════════════════════╗
-// ║              SIDEBAR / NAVIGATION                ║
+// ║         MOBILE SIDEBAR DRAWER CONTROLS           ║
 // ╚══════════════════════════════════════════════════╝
+function toggleMobileSidebar() {
+  const sb = document.getElementById("sidebar");
+  const ov = document.getElementById("sidebarOverlay");
+  const open = sb.classList.contains("mobile-open");
+  if (open) {
+    sb.classList.remove("mobile-open");
+    ov.classList.remove("open");
+  } else {
+    sb.classList.add("mobile-open");
+    ov.classList.add("open");
+  }
+}
+function closeMobileSidebar() {
+  document.getElementById("sidebar").classList.remove("mobile-open");
+  document.getElementById("sidebarOverlay").classList.remove("open");
+}
+
+// Mobile nav icons (emoji shown in bottom tab bar)
+const mobileIcons = {
+  internDashboard: "📊",
+  internTasks: "✅",
+  internComplaints: "📣",
+  internNotifs: "🔔",
+  adminDashboard: "📊",
+  adminTasks: "📋",
+  adminNotifs: "🔔",
+  adminComplaints: "📣",
+  adminSettings: "⚙️",
+};
+const mobileLabels = {
+  internDashboard: "Home",
+  internTasks: "Tasks",
+  internComplaints: "Complain",
+  internNotifs: "Alerts",
+  adminDashboard: "Home",
+  adminTasks: "Tasks",
+  adminNotifs: "Alerts",
+  adminComplaints: "Inbox",
+  adminSettings: "Settings",
+};
+const mobileBadges = {
+  internTasks: "mb-notif",
+  adminNotifs: "mb-admin-notif",
+  adminComplaints: "mb-complaint",
+};
 const internNav = [
   { id: "internDashboard", icon: "📊", label: "Dashboard" },
   { id: "internTasks", icon: "✅", label: "Tasks", badge: "sb-notif" },
@@ -340,29 +330,69 @@ const adminNav = [
 
 function renderSidebar() {
   const nav = currentRole === "admin" ? adminNav : internNav;
+  // Desktop sidebar
   document.getElementById("sidebar").innerHTML =
     '<div class="sidebar-section">Menu</div>' +
     nav
       .map(
         (
           n,
-        ) => `<div class="sidebar-item" id="nav-${n.id}" onclick="navigateTo('${n.id}')">
+        ) => `<div class="sidebar-item" id="nav-${n.id}" onclick="navigateTo('${n.id}');closeMobileSidebar();">
       <span class="sidebar-icon">${n.icon}</span>${n.label}
       ${n.badge ? `<span class="sidebar-badge" id="${n.badge}"></span>` : ""}
     </div>`,
       )
       .join("");
+  // Mobile bottom nav
+  const mni = document.getElementById("mobileNavInner");
+  if (mni) {
+    const mobileLabel = {
+      internDashboard: "Home",
+      internTasks: "Tasks",
+      internComplaints: "Inbox",
+      internNotifs: "Alerts",
+      adminDashboard: "Home",
+      adminTasks: "Tasks",
+      adminNotifs: "Alerts",
+      adminComplaints: "Inbox",
+      adminSettings: "Settings",
+    };
+    const mobileBadgeId = {
+      internTasks: "mb-notif",
+      adminNotifs: "mb-admin-notif",
+      adminComplaints: "mb-complaint",
+    };
+    mni.innerHTML = nav
+      .map(
+        (n) => `
+      <button class="mobile-nav-item" id="mnav-${n.id}" onclick="navigateTo('${n.id}')">
+        <span class="mn-icon">${n.icon}</span>
+        ${mobileLabel[n.id] || n.label}
+        ${mobileBadgeId[n.id] ? `<span class="mobile-nav-badge" id="${mobileBadgeId[n.id]}"></span>` : ""}
+      </button>`,
+      )
+      .join("");
+  }
   updateBadges();
 }
 
 async function navigateTo(page) {
   currentPage = page;
+  // Update desktop sidebar active
   document
     .querySelectorAll(".sidebar-item")
     .forEach((el) => el.classList.remove("active"));
   const el = document.getElementById("nav-" + page);
   if (el) el.classList.add("active");
+  // Update mobile bottom nav active
+  document
+    .querySelectorAll(".mobile-nav-item")
+    .forEach((el) => el.classList.remove("active"));
+  const mel = document.getElementById("mnav-" + page);
+  if (mel) mel.classList.add("active");
+  // Scroll content to top on mobile
   const ca = document.getElementById("contentArea");
+  ca.scrollTop = 0;
   const map = {
     internDashboard: () => renderInternDashboard(ca),
     internTasks: () => renderInternTasks(ca),
@@ -389,6 +419,11 @@ function updateBadges() {
       el.textContent = n || "";
       el.className = "sidebar-badge" + (n ? " show" : "");
     }
+    const mel = document.getElementById("mb-notif");
+    if (mel) {
+      mel.textContent = n || "";
+      mel.className = "mobile-nav-badge" + (n ? " show" : "");
+    }
     document.getElementById("notifDot").className =
       "notif-dot" + (n ? " show" : "");
   } else {
@@ -403,6 +438,16 @@ function updateBadges() {
     if (ela) {
       ela.textContent = na || "";
       ela.className = "sidebar-badge" + (na ? " show" : "");
+    }
+    const mc = document.getElementById("mb-complaint");
+    if (mc) {
+      mc.textContent = nc || "";
+      mc.className = "mobile-nav-badge" + (nc ? " show" : "");
+    }
+    const ma = document.getElementById("mb-admin-notif");
+    if (ma) {
+      ma.textContent = na || "";
+      ma.className = "mobile-nav-badge" + (na ? " show" : "");
     }
     document.getElementById("notifDot").className =
       "notif-dot" + (nc + na ? " show" : "");
@@ -981,7 +1026,7 @@ function renderAdminTasks(ca) {
       </div>
       <button class="btn btn-primary" onclick="openCreateTask()">+ Create Task</button>
     </div>
-    <div class="card" style="padding:0;overflow:hidden;">
+    <div class="card table-wrap" style="padding:0;overflow-x:auto;">
       <table class="table">
         <thead><tr><th>Title</th><th>Description</th><th>Assigned To</th><th>Category</th><th>Points</th><th>Due</th><th>Status</th></tr></thead>
         <tbody>
@@ -1197,11 +1242,7 @@ function cancelRep() {
 function confirmRep(ctx) {
   const ov = document.getElementById("subDialogOverlay");
   const st = ov._rs;
-  _repeatConfig = {
-    freq: st.freq,
-    interval: st.interval,
-    days: [...st.days],
-  };
+  _repeatConfig = { freq: st.freq, interval: st.interval, days: [...st.days] };
   ov.remove();
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const label = `Every ${st.interval} ${st.freq}${
@@ -1353,7 +1394,7 @@ function renderAdminSettings(ca) {
       ${
         contribs.length === 0
           ? `<div style="padding:18px;color:var(--text2);text-align:center;">No contributors yet.</div>`
-          : `<table class="table">
+          : `<div style="overflow-x:auto;"><table class="table">
             <thead><tr><th>Name</th><th>Code</th><th>Category</th><th>Actions</th></tr></thead>
             <tbody>
               ${contribs
@@ -1370,7 +1411,7 @@ function renderAdminSettings(ca) {
                 )
                 .join("")}
             </tbody>
-          </table>`
+          </table></div>`
       }
     </div>
 
