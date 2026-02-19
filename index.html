@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TraineeXP Portal</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay">
+      <div class="load-logo">⚡ TraineeXP</div>
+      <div class="spinner"></div>
+      <div class="load-msg" id="loadMsg">Connecting to server...</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="screen" id="loginScreen">
+      <div class="login-box">
+        <div class="login-logo">⚡ TraineeXP</div>
+        <div class="login-title">Welcome Back</div>
+        <div class="login-sub">Intern Performance Management System</div>
+        <div class="form-group">
+          <label>Username</label
+          ><input
+            type="text"
+            id="loginUser"
+            placeholder="e.g. admin or shuja"
+            onkeydown="if (event.key === 'Enter') doLogin();"
+          />
+        </div>
+        <div class="form-group">
+          <label>Password</label
+          ><input
+            type="password"
+            id="loginPass"
+            placeholder="Password"
+            onkeydown="if (event.key === 'Enter') doLogin();"
+          />
+        </div>
+        <button class="btn btn-primary btn-full" onclick="doLogin()">
+          Sign In →
+        </button>
+        <div class="error-msg" id="loginError">
+          Invalid credentials. Please try again.
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="screen" id="mainScreen">
+      <!-- Sidebar overlay for mobile tap-to-close -->
+      <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+        onclick="closeMobileSidebar()"
+      ></div>
+      <div class="topbar">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <button
+            class="hamburger"
+            id="hamburgerBtn"
+            onclick="toggleMobileSidebar()"
+          >
+            ☰
+          </button>
+          <div class="topbar-logo">⚡ TraineeXP</div>
+        </div>
+        <div class="topbar-right">
+          <span class="sync-status" id="syncStatus"></span>
+          <button class="sync-btn" id="syncBtn" onclick="manualSync()">
+            <span class="s-icon">🔄</span><span> Sync</span>
+          </button>
+          <button class="notif-bell" onclick="handleNotifClick()">
+            🔔<span class="notif-dot" id="notifDot"></span>
+          </button>
+          <div class="user-chip">
+            <div class="user-avatar" id="topAvatar"></div>
+            <div>
+              <div class="user-name" id="topName">-</div>
+              <div class="user-role" id="topRole">-</div>
+            </div>
+          </div>
+          <button class="logout-btn" onclick="doLogout()" title="Logout">
+            ⏻
+          </button>
+        </div>
+      </div>
+      <div class="main-content">
+        <div class="sidebar" id="sidebar"></div>
+        <div class="content-area" id="contentArea"></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast">
+      <span id="toastIcon">✓</span><span id="toastMsg">Done!</span>
+    </div>
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div id="modalBody"></div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
