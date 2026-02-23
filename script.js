@@ -88,13 +88,13 @@ const INTERN_HASHES = {
   9: "66d0b2bb65da376ef1e8c8f47498743d874cc34d6bca47c09d97a3dba38810c3",
   10: "375073aab4145956b3d8f091d495b5ef6d5a75f61c60b9b39e13c57f131281e2",
   11: "cb6b83715df484baed6f54e05e6f461487e962ae1344952e038ced95560648fc",
-  99: "fff7713c12b9fd8116247457587f237d7c58f6e4fe95deff0fc41dfc9d9ec563",
+  99: "8c0b92321ba9ff8125825fcd7990a0074c9631aacc2e377cdc7d10a09d4d6b8e",
 };
 
 // BUG-04 FIX: Settings lock uses hash comparison — code never lives client-side.
 // SHA-256 of original code "TXP@dm!n2025":
 const SETTINGS_HASH =
-  "60099569b8e009aa72a3b2b296c7b15b4424ba614e2a3bc805cc0e439e5ed164";
+  "972bb562f1fffaa9968faca92c5aa8bb98f8cf58d00d2c0c2c1c49457abf0440";
 
 const CAT_KEYS = {
   "College Attendance": "college",
