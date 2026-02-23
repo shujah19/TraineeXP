@@ -77,7 +77,7 @@ const INTERNS = [
 // Interns: sha256(username+"123"). Admin: sha256("TXPAdmin@2025!").
 // These are one-way hashes — originals cannot be recovered from them.
 const INTERN_HASHES = {
-  1: "2d6668d1170157905313a4c100a5dcbf7bb70555129e3f5419d554f0f3f245c0",
+  1: "9cf3548e130ea57e18bf7fdabf1343f4ad070a08e49d0ae31fc1359b58edca6c",
   2: "54147aa1bea98d0d7a980fadb72115825d1ffffdda7c198bdd968f50891917e4",
   3: "d5083e34522626dd10e151c78c1ba502a3d67427b752c3fd43bd3b944072d1e7",
   4: "b385d9ecee39fe284b0eeac3bd18a6003961054e016b96dd9642e1c3edce66e8",
