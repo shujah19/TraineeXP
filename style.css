@@ -1,3 +1,16 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+body {
+    display: flex;
+    justify-content: center;   /* center horizontally */
+    align-items: center;       /* center vertically */
+    min-height: 100vh;
+    background: #f5f5f5;       /* optional */
+}
 :root {
   --bg: #f0f2f5;
   --surface: #fff;
