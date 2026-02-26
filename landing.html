@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
+<meta name="description" content="TraineeXP — Gamified intern performance management. Track tasks, earn points, manage attendance — all in real-time.">
+<title>TraineeXP — Intern Performance Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════ */
+:root{
+  --orange:#e85d26;--orange-h:#ff7a42;
+  --orange-dim:rgba(232,93,38,.11);
+  --dark:#0f1117;--dark2:#16191f;--dark3:#1e2230;--dark4:#252b3b;
+  --cream:#f7f3ee;--cream2:#ede9e3;
+  --txt:#0f1117;--txt2:#5a6173;--txt3:#9aa0b2;
+  --bdr:rgba(0,0,0,.08);--bdr-d:rgba(255,255,255,.07);
+  --r:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;overflow-x:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{font-family:'Outfit',sans-serif;line-height:1.08;}
+a{text-decoration:none;color:inherit;}
+img{display:block;max-width:100%;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:var(--orange);border-radius:99px;}
+
+/* ═══════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════ */
+.w{max-width:1180px;margin:0 auto;padding:0 32px;width:100%;}
+.tc{text-align:center;}.tc .sp{margin:0 auto;}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:99px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;transition:all .22s;white-space:nowrap;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.btn-lg{padding:17px 36px;font-size:17px;}
+.btn-o{background:var(--orange);color:#fff;box-shadow:0 6px 24px rgba(232,93,38,.38);}
+.btn-o:hover{background:var(--orange-h);box-shadow:0 8px 32px rgba(232,93,38,.55);transform:translateY(-2px);}
+.btn-w{background:#fff;color:var(--dark);box-shadow:0 4px 16px rgba(0,0,0,.12);}
+.btn-w:hover{box-shadow:0 8px 28px rgba(0,0,0,.2);transform:translateY(-2px);}
+.btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);}
+.btn-ghost:hover{background:rgba(255,255,255,.18);transform:translateY(-1px);}
+.btn-od{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.5);font-weight:700;}
+.btn-od:hover{border-color:var(--orange);color:var(--orange);background:rgba(232,93,38,.08);}
+#nav.solid .btn-od{color:var(--txt);border-color:var(--orange);}
+#nav.solid .btn-od:hover{background:var(--orange);color:#fff;}
+
+.pill{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:99px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;}
+.pill-o{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(232,93,38,.22);}
+.pill-d{background:rgba(255,255,255,.08);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.12);}
+.pdot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pdotP 2s ease-in-out infinite;}
+@keyframes pdotP{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.7);opacity:.5;}}
+
+/* ═══════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════ */
+#nav{position:fixed;top:0;left:0;right:0;z-index:1000;transition:background .3s,box-shadow .3s;}
+#nav.solid{background:rgba(247,243,238,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);box-shadow:0 2px 16px rgba(0,0,0,.06);}
+.ni{display:flex;align-items:center;justify-content:space-between;height:70px;}
+.nlogo{font-family:'Outfit',sans-serif;font-size:21px;font-weight:900;display:flex;align-items:center;gap:10px;letter-spacing:-.5px;}
+.nlogo-ic{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--orange),var(--orange-h));display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 4px 16px rgba(232,93,38,.4);flex-shrink:0;}
+.nlinks{display:flex;align-items:center;gap:34px;list-style:none;font-size:14px;font-weight:500;color:var(--txt2);}
+.nlinks a:hover{color:var(--orange);}
+.nact{display:flex;align-items:center;gap:10px;}
+.nburger{display:none;flex-direction:column;gap:5px;padding:8px;background:none;border:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.nburger span{display:block;width:22px;height:2px;background:var(--txt);border-radius:2px;transition:.3s;}
+
+/* ═══════════════════════════════════════════
+   MOBILE DRAWER
+═══════════════════════════════════════════ */
+.drawer{position:fixed;inset:0;z-index:999;background:var(--dark);display:none;flex-direction:column;align-items:center;justify-content:center;gap:32px;}
+.drawer.open{display:flex;}
+.drawer a{font-family:'Outfit',sans-serif;font-size:28px;font-weight:800;color:rgba(255,255,255,.7);transition:.2s;}
+.drawer a:hover{color:var(--orange);}
+.dclose{position:absolute;top:24px;right:26px;font-size:26px;color:rgba(255,255,255,.6);background:none;border:none;cursor:pointer;}
+
+/* ═══════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════ */
+.hero{min-height:100vh;background:linear-gradient(145deg,#0c0f14 0%,#180e08 48%,#0f1117 100%);display:flex;align-items:center;padding:110px 0 80px;position:relative;overflow:hidden;width:100%;}
+.hgrid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.026) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.026) 1px,transparent 1px);background-size:70px 70px;mask-image:radial-gradient(ellipse 90% 80% at 50% 50%,black 20%,transparent 75%);}
+.hglow{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
+.hg1{width:580px;height:480px;right:-80px;top:5%;background:radial-gradient(circle,rgba(232,93,38,.23) 0%,transparent 70%);animation:gf 9s ease-in-out infinite;}
+.hg2{width:320px;height:320px;left:-20px;bottom:8%;background:radial-gradient(circle,rgba(232,93,38,.1) 0%,transparent 70%);animation:gf 13s ease-in-out infinite reverse;}
+@keyframes gf{0%,100%{transform:translateY(0);}50%{transform:translateY(-26px);}}
+.hero-in{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:1;width:100%;}
+.htxt{color:#fff;}
+.hey{margin-bottom:22px;}
+.hh1{font-size:clamp(44px,6vw,76px);font-weight:900;letter-spacing:-2.5px;margin-bottom:22px;color:#fff;}
+.hh1 em{font-style:normal;color:var(--orange);position:relative;display:inline-block;}
+.hh1 em::after{content:'';position:absolute;left:0;bottom:-4px;right:0;height:3px;background:var(--orange);border-radius:2px;transform:scaleX(0);transform-origin:left;animation:lr .9s .7s cubic-bezier(.34,1.56,.64,1) forwards;}
+@keyframes lr{to{transform:scaleX(1);}}
+.hsub{font-size:18px;color:rgba(255,255,255,.52);max-width:420px;margin-bottom:36px;line-height:1.78;font-weight:300;}
+.hbtns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:50px;align-items:center;}
+.hstats{display:flex;gap:36px;flex-wrap:wrap;}
+.hsn{font-family:'Outfit',sans-serif;font-size:32px;font-weight:900;color:#fff;line-height:1;}
+.hsl{font-size:11px;color:rgba(255,255,255,.33);text-transform:uppercase;letter-spacing:.6px;margin-top:4px;}
+
+/* Phone frame */
+.hvis{position:relative;display:flex;justify-content:center;align-items:center;}
+.phone-wrap{position:relative;z-index:2;animation:pr .9s .15s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes pr{from{opacity:0;transform:scale(.82) translateY(40px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.phone{width:286px;background:var(--dark3);border-radius:36px;border:1.5px solid rgba(255,255,255,.1);overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.05) inset,0 50px 120px rgba(0,0,0,.7),0 0 80px rgba(232,93,38,.13);}
+.pnotch{height:26px;background:var(--dark);display:flex;align-items:center;justify-content:center;}
+.pnbar{width:68px;height:4px;border-radius:4px;background:rgba(255,255,255,.14);}
+.ptbar{background:rgba(15,17,23,.96);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bdr-d);}
+.ptlogo{font-family:'Outfit',sans-serif;font-size:13px;font-weight:900;color:var(--orange);}
+.ptav{width:26px;height:26px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;}
+.ptnm{font-size:10px;font-weight:700;color:#fff;}.ptrl{font-size:8px;color:rgba(255,255,255,.36);}
+.pbody{padding:12px;}
+.ptscard{border-radius:14px;padding:14px;margin-bottom:9px;background:linear-gradient(135deg,#e85d26,#ff8c42);display:flex;justify-content:space-between;align-items:center;box-shadow:0 8px 24px rgba(232,93,38,.4);}
+.ptsn{font-family:'Outfit',sans-serif;font-size:30px;font-weight:900;color:#fff;line-height:1;}
+.ptsl{font-size:9px;color:rgba(255,255,255,.72);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;}
+.ptsico{font-size:32px;}
+.obw{margin-top:8px;}
+.oblbl{display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.48);margin-bottom:4px;}
+.obtrack{height:4px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden;}
+.obfill{height:100%;background:#fff;border-radius:99px;width:87%;}
+.mstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:9px;}
+.mst{background:rgba(255,255,255,.05);border-radius:10px;padding:8px 4px;text-align:center;border:1px solid rgba(255,255,255,.05);}
+.msn{font-family:'Outfit',sans-serif;font-size:16px;font-weight:900;color:#fff;}
+.msl{font-size:7.5px;color:rgba(255,255,255,.36);margin-top:2px;}
+.tlbl{font-size:8px;font-weight:700;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+.trow{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border-radius:9px;padding:7px 9px;margin-bottom:5px;border:1px solid rgba(255,255,255,.05);}
+.tcirc{width:16px;height:16px;border-radius:50%;flex-shrink:0;border:1.5px solid rgba(255,255,255,.2);}
+.tcirc.done{background:#27ae60;border-color:#27ae60;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;}
+.ttitle{font-size:9.5px;color:rgba(255,255,255,.75);flex:1;}
+.tpts{font-size:8.5px;color:var(--orange);font-weight:800;}
+.fcard{position:absolute;background:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 16px 48px rgba(0,0,0,.28);display:flex;align-items:center;gap:10px;z-index:3;min-width:168px;animation:cf 4s ease-in-out infinite;}
+.fc2{animation-delay:2.1s;animation-direction:reverse;}
+.fcl{right:-30px;top:60px;}.fcr{left:-36px;bottom:80px;}
+@keyframes cf{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.fcico{font-size:22px;}.fct{font-size:11px;font-weight:700;color:var(--txt);}.fcs{font-size:9.5px;color:var(--txt2);}
+
+/* ═══════════════════════════════════════════
+   MARQUEE
+═══════════════════════════════════════════ */
+.mq{background:var(--dark);padding:18px 0;overflow:hidden;position:relative;}
+.mq::before,.mq::after{content:'';position:absolute;top:0;bottom:0;width:130px;z-index:2;}
+.mq::before{left:0;background:linear-gradient(90deg,var(--dark),transparent);}
+.mq::after{right:0;background:linear-gradient(-90deg,var(--dark),transparent);}
+.mqt{display:flex;gap:52px;align-items:center;animation:mqs 24s linear infinite;width:max-content;}
+.mqt:hover{animation-play-state:paused;}
+@keyframes mqs{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.mqi{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.38);font-size:13px;font-weight:600;white-space:nowrap;}
+.mqi span:first-child{font-size:18px;}
+
+/* ═══════════════════════════════════════════
+   SECTIONS
+═══════════════════════════════════════════ */
+section{padding:112px 0;}
+.sey{margin-bottom:16px;}
+.sh{font-size:clamp(34px,4vw,56px);font-weight:900;letter-spacing:-1.8px;margin-bottom:18px;}
+.sp{font-size:18px;color:var(--txt2);max-width:540px;line-height:1.78;font-weight:300;}
+
+.rv{opacity:0;transform:translateY(36px);transition:opacity .75s,transform .75s;}
+.rv.in{opacity:1;transform:translateY(0);}
+.d1{transition-delay:.1s;}.d2{transition-delay:.2s;}.d3{transition-delay:.3s;}.d4{transition-delay:.4s;}
+
+/* HOW */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:68px;}
+.scard{background:#fff;border-radius:22px;padding:36px 28px;border:1px solid var(--bdr);position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;}
+.scard:hover{transform:translateY(-5px);box-shadow:0 24px 64px rgba(0,0,0,.14);}
+.scard::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--orange-h));}
+.snum{font-family:'Outfit',sans-serif;font-size:64px;font-weight:900;color:rgba(232,93,38,.07);line-height:1;margin-bottom:14px;}
+.sico{font-size:36px;margin-bottom:14px;}
+.sh3{font-size:21px;font-weight:800;margin-bottom:10px;}
+.sp3{font-size:14px;color:var(--txt2);line-height:1.75;}
+
+/* FEATURES */
+.features{background:#fff;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-bottom:120px;}
+.frow:last-child{margin-bottom:0;}
+.frow.rev{direction:rtl;}
+.frow.rev>*{direction:ltr;}
+.ftxt .sh{font-size:36px;letter-spacing:-1.2px;margin-bottom:14px;}
+.ftxt .sp{font-size:15.5px;max-width:100%;margin-bottom:26px;}
+.fcks{display:flex;flex-direction:column;gap:13px;margin-bottom:30px;}
+.fck-r{display:flex;align-items:flex-start;gap:11px;}
+.fck-ic{width:22px;height:22px;border-radius:50%;flex-shrink:0;background:var(--orange-dim);border:1.5px solid rgba(232,93,38,.24);display:flex;align-items:center;justify-content:center;color:var(--orange);font-size:10px;margin-top:2px;}
+.fck-tx{font-size:14.5px;color:var(--txt2);line-height:1.65;}
+.fck-tx strong{color:var(--txt);}
+
+/* Mock panels */
+.mock{background:var(--dark3);border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.08);box-shadow:0 32px 80px rgba(0,0,0,.22);}
+.mbar{background:var(--dark2);padding:10px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--bdr-d);}
+.mdot{width:10px;height:10px;border-radius:50%;}
+.mtitle{font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.42);margin-left:4px;}
+.mbody{padding:16px;}
+
+/* Kanban mock */
+.kbg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.kch{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:5px 9px;border-radius:6px 6px 0 0;margin-bottom:5px;}
+.kc-off{background:rgba(59,130,246,.14);color:#7db4ff;}
+.kc-aca{background:rgba(168,85,247,.14);color:#c4a0ff;}
+.kc-per{background:rgba(34,197,94,.14);color:#7de0a0;}
+.kc{background:rgba(255,255,255,.05);border-radius:7px;padding:8px;margin-bottom:5px;border:1px solid rgba(255,255,255,.06);}
+.kct{font-size:9.5px;color:rgba(255,255,255,.8);margin-bottom:4px;}
+.kcm{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+.kpts{font-size:8.5px;color:var(--orange);font-weight:800;}
+.kbd{background:rgba(39,174,96,.2);color:#7de0a0;font-size:7.5px;padding:1px 5px;border-radius:4px;font-weight:700;}
+.kpd{background:rgba(232,93,38,.18);color:#ffaa7f;font-size:7.5px;padding:1px 5px;border-radius:4px;font-weight:700;}
+.kap{background:rgba(251,191,36,.18);color:#fde68a;font-size:7.5px;padding:1px 5px;border-radius:4px;font-weight:700;}
+
+/* Entry mock */
+.er{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.04);border-radius:10px;padding:9px 12px;margin-bottom:7px;border:1px solid rgba(255,255,255,.06);}
+.erl{display:flex;align-items:center;gap:10px;}
+.eric{font-size:18px;}
+.ernm{font-size:10.5px;font-weight:700;color:rgba(255,255,255,.85);}
+.erct{font-size:8.5px;color:rgba(255,255,255,.33);}
+.erpts{font-family:'Outfit',sans-serif;font-size:13px;font-weight:900;color:var(--orange);}
+
+/* Admin table */
+.at{width:100%;border-collapse:collapse;font-size:10px;}
+.at th{color:rgba(255,255,255,.3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:6px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.07);}
+.at td{padding:8px 10px;color:rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.04);}
+.at tr:hover td{background:rgba(255,255,255,.03);}
+.atn{font-weight:800;color:#fff !important;}
+.atp{font-family:'Outfit',sans-serif;color:var(--orange)!important;font-weight:900;}
+.atb{display:inline-block;padding:2px 7px;border-radius:5px;font-size:8.5px;font-weight:700;}
+.atbg{background:rgba(39,174,96,.2);color:#7de0a0;}.atbr{background:rgba(232,93,38,.2);color:#ffaa7f;}
+.reqcard{background:rgba(232,93,38,.08);border-radius:10px;padding:11px 12px;margin-bottom:7px;border:1px solid rgba(232,93,38,.2);}
+.reqtop{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.reqav{width:28px;height:28px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;}
+.reqnm{font-size:10.5px;font-weight:700;color:#fff;}.reqtp{font-size:8.5px;color:rgba(255,255,255,.42);}
+.reqbtns{display:flex;gap:7px;}
+.rb{padding:4px 12px;border-radius:6px;font-size:9px;font-weight:700;border:none;cursor:pointer;font-family:'Outfit',sans-serif;}
+.rba{background:rgba(39,174,96,.2);color:#7de0a0;}.rbd{background:rgba(232,93,38,.2);color:#ffaa7f;}
+
+/* Contrib mock */
+.cc{background:rgba(255,255,255,.04);border-radius:11px;padding:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,.07);}
+.cct{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.ccnm{font-size:11px;font-weight:700;color:#fff;}
+.ccat{font-size:8px;padding:2px 8px;border-radius:4px;font-weight:700;text-transform:uppercase;}
+.cco{background:rgba(232,93,38,.15);color:var(--orange);}.ccb{background:rgba(99,102,241,.15);color:#a5b4fc;}
+.cccode{font-family:'Courier New',monospace;font-size:11px;color:rgba(255,255,255,.24);background:rgba(0,0,0,.35);padding:5px 10px;border-radius:7px;letter-spacing:4px;}
+
+/* ONBOARDING */
+.onboard{background:var(--dark);padding:112px 0;}
+.obgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:68px;}
+.obcard{border-radius:22px;padding:36px;border:1px solid var(--bdr-d);position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;}
+.obcard:hover{transform:translateY(-4px);box-shadow:0 24px 64px rgba(0,0,0,.3);}
+.oba{background:linear-gradient(140deg,#161b28,#1c2333);}
+.obb{background:linear-gradient(140deg,#1e160f,#241a10);border-color:rgba(232,93,38,.18);}
+.obc{background:linear-gradient(140deg,#0e1520,#111d2a);}
+.obd{background:linear-gradient(140deg,#14181f,#1a1f29);}
+.obnum{font-family:'Outfit',sans-serif;font-size:64px;font-weight:900;color:rgba(255,255,255,.08);line-height:1;margin-bottom:14px;}
+.obico{font-size:36px;margin-bottom:14px;}
+.obh{font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:10px;}
+.obp{font-size:14px;color:rgba(255,255,255,.82);line-height:1.75;}
+.obul{margin-top:14px;display:flex;flex-direction:column;gap:9px;}
+.obli{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(255,255,255,.78);}
+.obli::before{content:'→';color:var(--orange);font-weight:700;flex-shrink:0;font-size:12px;margin-top:1px;}
+
+/* ROLES */
+.roles{background:var(--cream2);padding:112px 0;}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:68px;}
+.rcard{background:#fff;border-radius:26px;padding:44px;border:1px solid var(--bdr);position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;}
+.rcard:hover{transform:translateY(-5px);box-shadow:0 32px 80px rgba(0,0,0,.13);}
+.rcard.adm::before{content:'';position:absolute;top:-80px;right:-80px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(232,93,38,.1),transparent 70%);}
+.rpill{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:99px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:22px;}
+.rpi{background:rgba(99,102,241,.1);color:#6366f1;border:1px solid rgba(99,102,241,.2);}
+.rpa{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(232,93,38,.2);}
+.rico{font-size:48px;margin-bottom:20px;}
+.rh{font-size:28px;font-weight:900;margin-bottom:12px;}
+.rp{font-size:15px;color:var(--txt2);margin-bottom:26px;line-height:1.7;}
+.rperks{display:flex;flex-direction:column;gap:11px;}
+.rperk{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--txt2);}
+.rpdot{width:7px;height:7px;border-radius:50%;background:var(--orange);flex-shrink:0;}
+
+/* STATS */
+.statsbar{background:#fff;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);padding:64px 0;}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;text-align:center;}
+.stn{font-family:'Outfit',sans-serif;font-size:50px;font-weight:900;color:var(--orange);line-height:1;}
+.stl{font-size:14px;color:var(--txt2);margin-top:7px;}
+
+/* CTA / DOWNLOAD */
+.cta{background:linear-gradient(145deg,#0d1016 0%,#1e1108 50%,#0f1117 100%);padding:120px 0;position:relative;overflow:hidden;}
+.cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 80% at 50% 50%,rgba(232,93,38,.17) 0%,transparent 65%);}
+.cta::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.024) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.024) 1px,transparent 1px);background-size:70px 70px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent 80%);}
+.ctain{position:relative;z-index:1;color:#fff;text-align:center;}
+.ctah{font-size:clamp(40px,6vw,72px);font-weight:900;letter-spacing:-2.5px;margin-bottom:20px;color:#fff;}
+.ctap{font-size:18px;color:rgba(255,255,255,.48);max-width:460px;margin:0 auto 44px;line-height:1.78;font-weight:300;}
+.ctabtns{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;}
+.ctanote{margin-top:26px;font-size:12px;color:rgba(255,255,255,.2);}
+.btn-dl{position:relative;overflow:hidden;}
+.btn-dl::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);animation:sh 2.5s ease-in-out infinite;}
+@keyframes sh{0%{left:-100%;}100%{left:200%;}}
+
+/* FOOTER */
+footer{background:var(--dark);border-top:1px solid rgba(255,255,255,.06);padding:36px 0;}
+.fin{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.flogo{font-family:'Outfit',sans-serif;font-size:19px;font-weight:900;color:#fff;display:flex;align-items:center;gap:9px;}
+.flic{width:30px;height:30px;border-radius:9px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.fcopy{font-size:12px;color:rgba(255,255,255,.26);}
+.flinks{display:flex;gap:22px;list-style:none;font-size:13px;color:rgba(255,255,255,.4);}
+.flinks a:hover{color:var(--orange);}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — TABLET (≤960px)
+═══════════════════════════════════════════ */
+@media(max-width:960px){
+  .hero-in,.frow,.obgrid,.rgrid{grid-template-columns:1fr;gap:40px;}
+  .hvis{display:none;}
+  .frow.rev{direction:ltr;}
+  .steps{grid-template-columns:1fr;gap:16px;}
+  .nlinks{display:none;}
+  .nact .btn-od{display:none;}
+  .nburger{display:flex;}
+  .sgrid{grid-template-columns:1fr 1fr;}
+  .htxt{text-align:center;}
+  .hey,.hbtns,.hstats{justify-content:center;}
+  .hbtns{flex-wrap:wrap;}
+  .hsub{margin-left:auto;margin-right:auto;}
+  .sh{font-size:clamp(28px,5vw,44px);}
+  .ftxt .sh{font-size:clamp(26px,4vw,36px);}
+  section{padding:80px 0;}
+  .frow{margin-bottom:80px;}
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — MOBILE (≤600px)
+═══════════════════════════════════════════ */
+@media(max-width:600px){
+  section{padding:60px 0;}
+  .w{padding:0 18px;}
+
+  /* Nav */
+  #nav .nact{gap:6px;}
+  #nav .btn-o{padding:8px 14px;font-size:13px;}
+
+  /* Hero */
+  .hero{padding:88px 0 56px;}
+  .hh1{font-size:clamp(36px,11vw,56px);letter-spacing:-1.5px;}
+  .hsub{font-size:15px;max-width:100%;}
+  .hbtns{flex-direction:column;align-items:center;width:100%;gap:10px;}
+  .hbtns .btn{width:100%;justify-content:center;padding:15px 20px;font-size:15px;}
+  .hstats{gap:20px;justify-content:center;flex-wrap:wrap;}
+  .hey{display:flex;justify-content:center;}
+
+  /* Marquee */
+  .mqi{font-size:12px;gap:7px;}
+  .mqi span:first-child{font-size:16px;}
+
+  /* How */
+  .steps{grid-template-columns:1fr;gap:14px;}
+  .scard{padding:28px 22px;}
+  .snum{font-size:50px;}
+
+  /* Features */
+  .frow{gap:28px;margin-bottom:60px;}
+  .frow.rev{direction:ltr;}
+  .ftxt .sh{font-size:clamp(24px,7vw,32px);}
+  .ftxt .sp{font-size:14px;}
+  .fck-tx{font-size:13.5px;}
+  .mock{border-radius:14px;}
+  .mbody{padding:12px;}
+
+  /* Onboard */
+  .obgrid{grid-template-columns:1fr;gap:14px;}
+  .obcard{padding:28px 22px;}
+  .obnum{font-size:50px;}
+  .obh{font-size:19px;}
+  .obp{font-size:13.5px;}
+  .obli{font-size:12.5px;}
+
+  /* Stats */
+  .statsbar{padding:48px 0;}
+  .sgrid{grid-template-columns:1fr 1fr;gap:24px;}
+  .stn{font-size:36px;}
+  .stl{font-size:12px;}
+
+  /* Roles */
+  .rgrid{grid-template-columns:1fr;gap:16px;}
+  .rcard{padding:32px 24px;}
+  .rico{font-size:40px;}
+  .rh{font-size:24px;}
+  .rp{font-size:14px;}
+  .rperk{font-size:13px;}
+
+  /* CTA */
+  .cta{padding:80px 0;}
+  .ctah{font-size:clamp(32px,9vw,52px);letter-spacing:-1.5px;}
+  .ctap{font-size:15px;}
+  .ctabtns{flex-direction:column;align-items:center;gap:12px;width:100%;}
+  .ctabtns .btn{width:100%;max-width:320px;justify-content:center;padding:15px 20px;font-size:15px;}
+
+  /* Footer */
+  .fin{flex-direction:column;text-align:center;gap:14px;}
+  .flinks{justify-content:center;flex-wrap:wrap;gap:14px;}
+  .fcopy{font-size:11px;}
+
+  /* Pill text smaller on mobile */
+  .pill{font-size:10px;padding:4px 11px;}
+
+  /* Section headings */
+  .sh{letter-spacing:-1px;}
+  .sp{font-size:15px;}
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — SMALL MOBILE (≤380px)
+═══════════════════════════════════════════ */
+@media(max-width:380px){
+  .hh1{font-size:32px;}
+  .ctah{font-size:30px;}
+  .w{padding:0 14px;}
+  .scard,.obcard,.rcard{padding:24px 18px;}
+}
+</style>
+</head>
+<body>
+
+<!-- MOBILE DRAWER -->
+<div class="drawer" id="drawer">
+  <button class="dclose" onclick="closeDrawer()">✕</button>
+  <a href="#features"  onclick="closeDrawer()">Features</a>
+  <a href="#onboard"   onclick="closeDrawer()">Guide</a>
+  <a href="#roles"     onclick="closeDrawer()">Roles</a>
+  <a href="#download"  onclick="closeDrawer()" style="color:var(--orange);">Download</a>
+  <a href="index.html" data-app-link="true" onclick="closeDrawer()" class="btn btn-o" style="margin-top:8px;">Sign Up →</a>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="w">
+    <div class="ni">
+      <a href="#" class="nlogo" style="color:var(--dark);">
+        <div class="nlogo-ic">⚡</div>
+        TraineeXP
+      </a>
+      <ul class="nlinks">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#onboard">Guide</a></li>
+        <li><a href="#roles">Roles</a></li>
+        <li><a href="#download">Download</a></li>
+      </ul>
+      <div class="nact">
+        <a href="index.html" data-app-link="true" class="btn btn-od" style="padding:9px 22px;font-size:14px;">Sign Up</a>
+        <a href="#download" class="btn btn-o" style="padding:9px 22px;font-size:14px;" id="navDl">⬇ Download APK</a>
+      </div>
+      <button class="nburger" onclick="openDrawer()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════ HERO ════════════════ -->
+<section class="hero" id="top">
+  <div class="hgrid"></div>
+  <div class="hglow hg1"></div>
+  <div class="hglow hg2"></div>
+  <div class="w" style="width:100%;">
+    <div class="hero-in">
+
+      <!-- Text -->
+      <div class="htxt">
+        <div class="hey">
+          <span class="pill pill-d"><span class="pdot"></span>Intern Performance Management</span>
+        </div>
+        <h1 class="hh1">Track. Compete.<br><em>Level Up.</em></h1>
+        <p class="hsub">TraineeXP turns intern management from messy spreadsheets into a live, gamified performance system — built for admins and interns alike.</p>
+        <div class="hbtns">
+          <a href="index.html" data-app-link="true" class="btn btn-o btn-lg">Sign Up — It's Free →</a>
+          <a href="#download"  class="btn btn-ghost btn-lg" id="heroDl">⬇ Download APK</a>
+        </div>
+        <div class="hstats">
+          <div><div class="hsn">11</div><div class="hsl">Interns tracked</div></div>
+          <div><div class="hsn">5</div><div class="hsl">Score categories</div></div>
+          <div><div class="hsn">v1.2</div><div class="hsl">Current release</div></div>
+        </div>
+      </div>
+
+      <!-- Phone -->
+      <div class="hvis">
+        <div class="fcard fcl">
+          <div class="fcico">⭐</div>
+          <div><div class="fct">+10 pts earned!</div><div class="fcs">Project submitted</div></div>
+        </div>
+        <div class="fcard fcr fc2">
+          <div class="fcico">✅</div>
+          <div><div class="fct">Task approved</div><div class="fcs">By contributor</div></div>
+        </div>
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="pnotch"><div class="pnbar"></div></div>
+            <div class="ptbar">
+              <div class="ptlogo">⚡ TraineeXP</div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="ptav">S</div>
+                <div><div class="ptnm">Shuja</div><div class="ptrl">Intern</div></div>
+              </div>
+            </div>
+            <div class="pbody">
+              <div class="ptscard">
+                <div>
+                  <div class="ptsl">Total Points</div>
+                  <div class="ptsn">1,250</div>
+                  <div class="obw">
+                    <div class="oblbl"><span>Obedience</span><span>87%</span></div>
+                    <div class="obtrack"><div class="obfill"></div></div>
+                  </div>
+                </div>
+                <div class="ptsico">🏆</div>
+              </div>
+              <div class="mstats">
+                <div class="mst"><div class="msn">18</div><div class="msl">Attendance</div></div>
+                <div class="mst"><div class="msn">7</div><div class="msl">Projects</div></div>
+                <div class="mst"><div class="msn">5</div><div class="msl">Bugs</div></div>
+              </div>
+              <div class="tlbl">Today's Tasks</div>
+              <div class="trow"><div class="tcirc done">✓</div><div class="ttitle">Morning standup</div><div class="tpts">+5</div></div>
+              <div class="trow"><div class="tcirc"></div><div class="ttitle">Submit bug report</div><div class="tpts">+8</div></div>
+              <div class="trow"><div class="tcirc"></div><div class="ttitle">Review PR #14</div><div class="tpts">+10</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="mq">
+  <div class="mqt">
+    <div class="mqi"><span>⚡</span>Real-time Sync</div>
+    <div class="mqi"><span>🏆</span>Gamified Points</div>
+    <div class="mqi"><span>📋</span>Kanban Board</div>
+    <div class="mqi"><span>✅</span>Task Approval</div>
+    <div class="mqi"><span>🎓</span>Attendance Tracking</div>
+    <div class="mqi"><span>🔐</span>Contributor Codes</div>
+    <div class="mqi"><span>📊</span>Admin Dashboard</div>
+    <div class="mqi"><span>📨</span>Send Requests</div>
+    <div class="mqi"><span>📣</span>Complaints System</div>
+    <div class="mqi"><span>📤</span>Excel Export</div>
+    <div class="mqi"><span>🔁</span>Recurring Tasks</div>
+    <div class="mqi"><span>📱</span>Android App</div>
+    <div class="mqi"><span>⚡</span>Real-time Sync</div>
+    <div class="mqi"><span>🏆</span>Gamified Points</div>
+    <div class="mqi"><span>📋</span>Kanban Board</div>
+    <div class="mqi"><span>✅</span>Task Approval</div>
+    <div class="mqi"><span>🎓</span>Attendance Tracking</div>
+    <div class="mqi"><span>🔐</span>Contributor Codes</div>
+    <div class="mqi"><span>📊</span>Admin Dashboard</div>
+    <div class="mqi"><span>📨</span>Send Requests</div>
+    <div class="mqi"><span>📣</span>Complaints System</div>
+    <div class="mqi"><span>📤</span>Excel Export</div>
+    <div class="mqi"><span>🔁</span>Recurring Tasks</div>
+    <div class="mqi"><span>📱</span>Android App</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="w">
+    <div class="tc rv">
+      <div class="sey"><span class="pill pill-o">How It Works</span></div>
+      <h2 class="sh">Simple by design.<br>Powerful by function.</h2>
+      <p class="sp">No training needed. Both admins and interns are productive from minute one.</p>
+    </div>
+    <div class="steps">
+      <div class="scard rv d1">
+        <div class="snum">01</div><div class="sico">🔑</div>
+        <h3 class="sh3">Sign In Instantly</h3>
+        <p class="sp3">Each intern and admin has a pre-set, hashed login. Open the app, enter credentials, and you're inside your personal dashboard in seconds — no setup required.</p>
+      </div>
+      <div class="scard rv d2">
+        <div class="snum">02</div><div class="sico">📋</div>
+        <h3 class="sh3">Tasks Get Assigned</h3>
+        <p class="sp3">Admin creates tasks — single or bulk to all 11 interns at once. Tasks appear on each intern's Kanban board sorted by Office, Academic, or Personal category.</p>
+      </div>
+      <div class="scard rv d3">
+        <div class="snum">03</div><div class="sico">🏆</div>
+        <h3 class="sh3">Complete & Earn Points</h3>
+        <p class="sp3">Interns tick off tasks, submit daily entries with contributor codes, and watch their score grow. Every action is verified before points are credited — no shortcuts.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="w">
+
+    <!-- F1: Kanban -->
+    <div class="frow rv">
+      <div class="ftxt">
+        <div class="sey"><span class="pill pill-o">Task Management</span></div>
+        <h2 class="sh">Kanban Board for Every Intern</h2>
+        <p class="sp">A live, three-column board — Office, Academic, Personal — always synced in real-time with the Firebase server.</p>
+        <div class="fcks">
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>One-tap completion</strong> with 5-second undo window — accidental taps never cost points.</div></div>
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>Approval-required tasks</strong> need contributor code or admin sign-off before they're marked done.</div></div>
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>Recurring tasks</strong> auto-generate on daily, weekly, or custom schedules so nothing slips.</div></div>
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>Filter by Today, All, Completed or Pending</strong> to always focus on what matters now.</div></div>
+        </div>
+      </div>
+      <div class="mock">
+        <div class="mbar">
+          <div class="mdot" style="background:#ff5f57;"></div><div class="mdot" style="background:#febc2e;"></div><div class="mdot" style="background:#28c840;"></div>
+          <div class="mtitle">Tasks — Shuja Haider · Today</div>
+        </div>
+        <div class="mbody">
+          <div class="kbg">
+            <div>
+              <div class="kch kc-off">🏢 Office</div>
+              <div class="kc"><div class="kct">Morning standup</div><div class="kcm"><span class="kpts">⭐5</span><span class="kbd">Done</span></div></div>
+              <div class="kc"><div class="kct">Update Jira ticket</div><div class="kcm"><span class="kpts">⭐8</span><span class="kpd">Pending</span></div></div>
+            </div>
+            <div>
+              <div class="kch kc-aca">🎓 Academic</div>
+              <div class="kc"><div class="kct">Read chapter 4</div><div class="kcm"><span class="kpts">⭐10</span><span class="kbd">Done</span></div></div>
+              <div class="kc"><div class="kct">Submit assignment</div><div class="kcm"><span class="kpts">⭐15</span><span class="kap">🔐 Approval</span></div></div>
+            </div>
+            <div>
+              <div class="kch kc-per">✨ Personal</div>
+              <div class="kc"><div class="kct">Daily exercise</div><div class="kcm"><span class="kpts">⭐3</span><span class="kpd">Pending</span></div></div>
+              <div class="kc"><div class="kct">Read news</div><div class="kcm"><span class="kpts">⭐2</span><span class="kpd">Pending</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F2: Entries -->
+    <div class="frow rev rv">
+      <div class="ftxt">
+        <div class="sey"><span class="pill pill-o">Attendance & Entries</span></div>
+        <h2 class="sh">Verified Daily Attendance Tracking</h2>
+        <p class="sp">Interns log daily attendance using a contributor's secret code. No code — no credit. Every entry is double-verified before points are awarded.</p>
+        <div class="fcks">
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>5 tracked categories:</strong> College Attendance, Office Attendance, Projects, Bugs, Suggestions.</div></div>
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>Daily limit of 3 per category</strong> prevents gaming the points system.</div></div>
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>Bonus points</strong> can be awarded for outstanding work on top of standard points.</div></div>
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>Send Request fallback</strong> — if contributor is unavailable, interns escalate to admin.</div></div>
+        </div>
+      </div>
+      <div class="mock">
+        <div class="mbar">
+          <div class="mdot" style="background:#ff5f57;"></div><div class="mdot" style="background:#febc2e;"></div><div class="mdot" style="background:#28c840;"></div>
+          <div class="mtitle">Performance Dashboard — This Month</div>
+        </div>
+        <div class="mbody">
+          <div class="er"><div class="erl"><div class="eric">🎓</div><div><div class="ernm">College Attendance</div><div class="erct">18 entries · 3/day limit</div></div></div><div class="erpts">+90</div></div>
+          <div class="er"><div class="erl"><div class="eric">🏢</div><div><div class="ernm">Office Attendance</div><div class="erct">22 entries · verified</div></div></div><div class="erpts">+110</div></div>
+          <div class="er"><div class="erl"><div class="eric">🚀</div><div><div class="ernm">Projects</div><div class="erct">7 submitted</div></div></div><div class="erpts">+70</div></div>
+          <div class="er"><div class="erl"><div class="eric">🐛</div><div><div class="ernm">Bugs Reported</div><div class="erct">5 accepted</div></div></div><div class="erpts">+40</div></div>
+          <div class="er"><div class="erl"><div class="eric">💡</div><div><div class="ernm">Suggestions</div><div class="erct">3 accepted</div></div></div><div class="erpts">+15</div></div>
+          <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);">
+            <span style="font-size:10px;color:rgba(255,255,255,.3);">Monthly Total</span>
+            <span style="font-family:'Outfit',sans-serif;font-size:24px;font-weight:900;color:var(--orange);">1,250 pts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F3: Admin -->
+    <div class="frow rv">
+      <div class="ftxt">
+        <div class="sey"><span class="pill pill-o">Admin Controls</span></div>
+        <h2 class="sh">Full Admin Dashboard & Oversight</h2>
+        <p class="sp">Admins see every intern's live performance, assign tasks in bulk, approve requests, handle complaints, and export polished Excel reports.</p>
+        <div class="fcks">
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>Bulk task assignment</strong> — create once, assign to all 11 interns simultaneously.</div></div>
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>Obedience Score</strong> auto-calculated from completed vs total assigned tasks.</div></div>
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>One-tap approve or deny</strong> for all pending intern entry and task completion requests.</div></div>
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>Export to Excel</strong> — full intern report: points, attendance, tasks, obedience score.</div></div>
+        </div>
+      </div>
+      <div class="mock">
+        <div class="mbar">
+          <div class="mdot" style="background:#ff5f57;"></div><div class="mdot" style="background:#febc2e;"></div><div class="mdot" style="background:#28c840;"></div>
+          <div class="mtitle">Admin Dashboard — All Interns</div>
+        </div>
+        <div class="mbody">
+          <table class="at">
+            <thead><tr><th>Name</th><th>Points</th><th>Obedience</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="atn">Shuja Haider</td><td class="atp">1,250</td><td>87%</td><td><span class="atb atbg">Active</span></td></tr>
+              <tr><td class="atn">Huzaifa Akbar</td><td class="atp">1,120</td><td>91%</td><td><span class="atb atbg">Active</span></td></tr>
+              <tr><td class="atn">Hamza Asghar</td><td class="atp">1,050</td><td>80%</td><td><span class="atb atbg">Active</span></td></tr>
+              <tr><td class="atn">Aamir Ali</td><td class="atp">980</td><td>72%</td><td><span class="atb atbg">Active</span></td></tr>
+              <tr><td class="atn">Qasim Abbas</td><td class="atp">640</td><td>55%</td><td><span class="atb atbr">Low</span></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:12px;">
+            <div class="reqcard">
+              <div class="reqtop">
+                <div class="reqav">S</div>
+                <div><div class="reqnm">📨 Shuja — Task: "Submit assignment"</div><div class="reqtp">Completion Request · Today</div></div>
+              </div>
+              <div class="reqbtns"><button class="rb rba">✅ Approve</button><button class="rb rbd">❌ Deny</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F4: Contributors -->
+    <div class="frow rev rv">
+      <div class="ftxt">
+        <div class="sey"><span class="pill pill-o">Verification System</span></div>
+        <h2 class="sh">Contributor Code Verification</h2>
+        <p class="sp">Third-party contributors hold secret codes. Interns enter the code to prove attendance or task completion. No code — no points. Zero exceptions.</p>
+        <div class="fcks">
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>Category-specific contributors</strong> — one per entry type, or a single one for all categories.</div></div>
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>Task-approval-only mode</strong> — contributors can be restricted to verifying task completions only.</div></div>
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>Codes never shown to interns</strong> — admin manages them in a hash-locked Settings panel.</div></div>
+          <div class="fck-r"><div class="fck-ic">✓</div><div class="fck-tx"><strong>Send Request fallback</strong> — interns escalate to admin approval if contributor is unavailable.</div></div>
+        </div>
+      </div>
+      <div class="mock">
+        <div class="mbar">
+          <div class="mdot" style="background:#ff5f57;"></div><div class="mdot" style="background:#febc2e;"></div><div class="mdot" style="background:#28c840;"></div>
+          <div class="mtitle">Settings 🔐 — Contributors</div>
+        </div>
+        <div class="mbody">
+          <div class="cc"><div class="cct"><div class="ccnm">Mr. Ahmed Raza</div><div class="ccat cco">College Attendance</div></div><div class="cccode">● ● ● ● ● ● ● ●</div></div>
+          <div class="cc"><div class="cct"><div class="ccnm">Sir Usman</div><div class="ccat cco">Office Attendance</div></div><div class="cccode">● ● ● ● ● ● ● ●</div></div>
+          <div class="cc"><div class="cct"><div class="ccnm">Tech Lead</div><div class="ccat ccb">Task Approval Only</div></div><div class="cccode">● ● ● ● ● ● ● ●</div></div>
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+            <button style="background:var(--orange);color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">+ Add Contributor</button>
+            <span style="font-size:9px;color:rgba(255,255,255,.28);">Codes never shown to interns</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ONBOARDING GUIDE -->
+<section class="onboard" id="onboard">
+  <div class="w">
+    <div class="tc rv" style="color:#fff;">
+      <div class="sey"><span class="pill pill-d">User Guide</span></div>
+      <h2 class="sh" style="color:#fff;">Everything you need to<br>get started fast</h2>
+      <p class="sp tc" style="color:rgba(255,255,255,.42);">New to TraineeXP? These four sections walk through everything the app does — step by step.</p>
+    </div>
+    <div class="obgrid">
+      <div class="obcard oba rv d1">
+        <div class="obnum">01</div><div class="obico">🗺️</div>
+        <h3 class="obh">Introducing the Features</h3>
+        <p class="obp">TraineeXP shows exactly what it can do from the moment you sign in. Every major feature is immediately visible on the dashboard.</p>
+        <ul class="obul">
+          <li>Points dashboard with live score and obedience %</li>
+          <li>Kanban board with today's assigned tasks</li>
+          <li>Entry submission with contributor verification</li>
+          <li>Real-time notifications and task alerts</li>
+        </ul>
+      </div>
+      <div class="obcard obb rv d2">
+        <div class="obnum">02</div><div class="obico">🧭</div>
+        <h3 class="obh">Guiding Users Through the App</h3>
+        <p class="obp">Every button, flow, and action is clearly labelled. Interns and admins are guided through each workflow intuitively — no manual required.</p>
+        <ul class="obul">
+          <li>Sidebar navigation with role-based menu items</li>
+          <li>Color-coded status badges: Done, Pending, Approval Required</li>
+          <li>Empty states explain what to do next when nothing is there</li>
+          <li>Contextual labels on every button and action</li>
+        </ul>
+      </div>
+      <div class="obcard obc rv d3">
+        <div class="obnum">03</div><div class="obico">🔐</div>
+        <h3 class="obh">Collecting Information Securely</h3>
+        <p class="obp">TraineeXP collects only what it needs — securely. Passwords are SHA-256 hashed, contributor codes are hidden from interns, and all data syncs through Firebase.</p>
+        <ul class="obul">
+          <li>Passwords stored as SHA-256 hashes — never as plaintext</li>
+          <li>Contributor code required before any entry is counted</li>
+          <li>Settings panel protected by a separate hash-verified lock</li>
+          <li>Session persistence — stay logged in between sessions</li>
+        </ul>
+      </div>
+      <div class="obcard obd rv d4">
+        <div class="obnum">04</div><div class="obico">📈</div>
+        <h3 class="obh">Improving Retention & Performance</h3>
+        <p class="obp">Interns who understand the system from day one perform better. The gamified points system and live scores keep everyone engaged and motivated.</p>
+        <ul class="obul">
+          <li>Points and obedience score update in real-time after every action</li>
+          <li>Notifications remind interns of pending tasks and approvals</li>
+          <li>Recurring tasks ensure daily habits are consistently tracked</li>
+          <li>Excel export lets admins share progress with management</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="statsbar">
+  <div class="w">
+    <div class="sgrid">
+      <div class="rv tc"><div class="stn" data-target="11">0</div><div class="stl">Interns managed simultaneously</div></div>
+      <div class="rv d1 tc"><div class="stn" data-target="5">0</div><div class="stl">Performance tracking categories</div></div>
+      <div class="rv d2 tc"><div class="stn" data-target="28">0</div><div class="stl">Bugs fixed &amp; secured in v1.2</div></div>
+      <div class="rv d3 tc"><div class="stn" data-target="100" data-sfx="%">0</div><div class="stl">Real-time Firebase data sync</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ROLES -->
+<section class="roles" id="roles">
+  <div class="w">
+    <div class="tc rv">
+      <div class="sey"><span class="pill pill-o">Two Roles</span></div>
+      <h2 class="sh">Built for both sides<br>of the table</h2>
+      <p class="sp">Separate dashboards and permissions — each role sees exactly what they need, nothing more.</p>
+    </div>
+    <div class="rgrid">
+      <div class="rcard rv d1">
+        <div class="rpill rpi">👨‍💼 Intern</div>
+        <div class="rico">🎓</div>
+        <h3 class="rh">Intern Portal</h3>
+        <p class="rp">Your personal workspace to see tasks, log daily entries, watch your points grow, and stay in sync with admin — from one clean dashboard.</p>
+        <div class="rperks">
+          <div class="rperk"><div class="rpdot"></div>Kanban board with today's assigned tasks</div>
+          <div class="rperk"><div class="rpdot"></div>Add entries using contributor secret code</div>
+          <div class="rperk"><div class="rpdot"></div>Live points counter &amp; obedience score</div>
+          <div class="rperk"><div class="rpdot"></div>Send requests when contributor is unavailable</div>
+          <div class="rperk"><div class="rpdot"></div>Create and manage personal custom tasks</div>
+          <div class="rperk"><div class="rpdot"></div>Submit and track private complaints</div>
+        </div>
+      </div>
+      <div class="rcard adm rv d2">
+        <div class="rpill rpa">🛡 Admin</div>
+        <div class="rico">📊</div>
+        <h3 class="rh">Admin Dashboard</h3>
+        <p class="rp">Full control over every intern's performance — assign tasks, manage contributors, approve requests, resolve complaints, and export reports.</p>
+        <div class="rperks">
+          <div class="rperk"><div class="rpdot"></div>Bulk-assign tasks to all 11 interns at once</div>
+          <div class="rperk"><div class="rpdot"></div>Live leaderboard showing all intern points</div>
+          <div class="rperk"><div class="rpdot"></div>Approve or deny entry &amp; task requests</div>
+          <div class="rperk"><div class="rpdot"></div>Manage contributors and their secret codes</div>
+          <div class="rperk"><div class="rpdot"></div>Full complaint management system</div>
+          <div class="rperk"><div class="rpdot"></div>Export any intern's full report to Excel</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD / CTA -->
+<section class="cta" id="download">
+  <div class="w">
+    <div class="ctain rv">
+      <div style="margin-bottom:20px;"><span class="pill pill-d"><span class="pdot"></span>Ready to Go</span></div>
+      <h2 class="ctah">Start your internship<br>the right way.</h2>
+      <p class="ctap">Open the web app directly in your browser, or download the Android APK and install it on any Android 7.0+ device.</p>
+      <div class="ctabtns">
+        <a href="index.html" data-app-link="true" class="btn btn-o btn-lg">Sign Up — It's Free →</a>
+        <button class="btn btn-w btn-lg btn-dl" id="ctaDl">⬇ &nbsp;Download Android APK</button>
+      </div>
+      <p class="ctanote">Android 7.0 (API 24) or higher required · APK ~7.4 MB · Free</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="w">
+    <div class="fin">
+      <div class="flogo"><div class="flic">⚡</div>TraineeXP</div>
+      <div class="fcopy">© 2025 TraineeXP · v1.2.0 · Built for intern excellence</div>
+      <ul class="flinks">
+        <li><a href="index.html" data-app-link="true">Sign Up</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#onboard">Guide</a></li>
+        <li><a href="#download">Download</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ─── APK Download ─────────────────────────────────────────────
+// Place TraineeXP-v1.2.0.apk in the same folder as this HTML file.
+function dlApk() {
+  // Works both locally (file://) and on Vercel
+  const isLocal = window.location.protocol === 'file:';
+  const apkUrl = isLocal ? 'app-debug.apk' : '/app-debug.apk';
+  const a = document.createElement('a');
+  a.href = apkUrl;
+  a.download = 'TraineeXP-v1.2.0.apk';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+['ctaDl','heroDl','navDl'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', function(e){ e.preventDefault(); dlApk(); });
+});
+
+// ─── Smart app links (Vercel vs local) ───────────────────────
+(function() {
+  const isLocal = window.location.protocol === 'file:';
+  // If on Vercel/server, redirect index.html → /app
+  if (!isLocal) {
+    document.querySelectorAll('[data-app-link]').forEach(el => {
+      el.setAttribute('href', '/app');
+    });
+  }
+})();
+
+// ─── Navbar scroll ────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('solid', window.scrollY > 50);
+});
+
+// ─── Mobile drawer ────────────────────────────────────────────
+function openDrawer()  { document.getElementById('drawer').classList.add('open');  document.body.style.overflow='hidden'; }
+function closeDrawer() { document.getElementById('drawer').classList.remove('open'); document.body.style.overflow=''; }
+
+// ─── Scroll reveal ────────────────────────────────────────────
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.1, rootMargin: '0px 0px -48px 0px' });
+document.querySelectorAll('.rv').forEach(el => io.observe(el));
+
+// ─── Count-up ─────────────────────────────────────────────────
+const cio = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target, end = +el.dataset.target, sfx = el.dataset.sfx || '';
+    const t0 = performance.now(), dur = 1600;
+    (function tick(now) {
+      const p = Math.min((now-t0)/dur,1);
+      el.textContent = Math.round(end*(1-Math.pow(1-p,3))) + sfx;
+      if(p<1) requestAnimationFrame(tick);
+    })(performance.now());
+    cio.unobserve(el);
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('[data-target]').forEach(el => cio.observe(el));
+</script>
+</body>
+</html>
