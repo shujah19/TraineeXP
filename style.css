@@ -222,9 +222,29 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0;}
 }
 
 /* Sidebar logout button — mobile only */
+.sidebar-add-entry {
+  display:flex;
+  margin:auto 12px 6px;
+  padding:11px 16px;
+  border-radius:10px;
+  border:1.5px solid rgba(232,93,38,.45);
+  background:rgba(232,93,38,.16);
+  color:#ff8c6a;
+  cursor:pointer;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:700;
+  text-align:left;
+  align-items:center;
+  gap:10px;
+  transition:background .15s,border-color .15s;
+  flex-shrink:0;
+}
+.sidebar-add-entry:hover { background:rgba(232,93,38,.28); border-color:rgba(232,93,38,.7); color:#fff; }
+.sidebar-add-entry span { white-space:nowrap; overflow:hidden; }
 .sidebar-logout {
   display:none;
-  margin:auto 12px 12px;
+  margin:0 12px 12px;
   padding:11px 16px;
   border-radius:10px;
   border:1px solid rgba(255,255,255,.08);
@@ -238,9 +258,11 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0;}
   align-items:center;
   gap:10px;
   transition:background .15s;
+  flex-shrink:0;
 }
 .sidebar-logout:hover { background:rgba(232,93,38,.22); }
 @media(max-width:768px){
+  .sidebar-add-entry { display:none; }
   .sidebar-logout { display:flex; }
   .sidebar { display:flex; flex-direction:column; }
 }
@@ -360,6 +382,8 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0;}
   .sidebar-item span:not(.sidebar-icon):not(.sidebar-badge){display:none;}
   .sidebar-badge{position:absolute;top:6px;right:6px;}
   .sidebar-item{position:relative;}
+  .sidebar-add-entry{padding:11px;justify-content:center;margin-bottom:4px;}
+  .sidebar-add-entry span{display:none;}
   .sidebar-logout{padding:11px;justify-content:center;}
   .sidebar-logout span{display:none;}
   /* 2-column Kanban on tablet */

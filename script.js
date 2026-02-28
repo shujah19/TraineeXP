@@ -648,6 +648,10 @@ function renderSidebar() {
       <span class="sidebar-icon"><i data-lucide="${n.icon}"></i></span>${n.label}
       ${n.badge ? `<span class="sidebar-badge" id="${n.badge}"></span>` : ''}
     </div>`).join('') +
+    (currentRole === 'intern' ? `<button class="sidebar-add-entry" id="sidebarAddEntry" onclick="openAddModal()">
+      <i data-lucide="plus-circle" style="width:15px;height:15px;flex-shrink:0;"></i>
+      <span>Add Entry</span>
+    </button>` : '') +
     `<button class="sidebar-logout" onclick="doLogout()">
       <i data-lucide="log-out" style="width:15px;height:15px;flex-shrink:0;"></i>
       Log Out
@@ -826,7 +830,6 @@ function renderInternDashboard(ca) {
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
       <button class="btn btn-primary" onclick="openAddModal()">+ Add Entry</button>
-      <button class="btn btn-secondary" onclick="openSendRequest()">📨 Send Request</button>
     </div>
   </div>`;
 }
@@ -862,7 +865,6 @@ function openAddModal() {
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-secondary" onclick="closeModal();openSendRequest()">📨 Send Request</button>
       <button class="btn btn-primary" onclick="submitAdd()">Submit</button>
     </div>`);
   refreshContribInfo();
