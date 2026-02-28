@@ -550,7 +550,6 @@ async function doLogin() {
     window.adminSelectedIntern = null; window.atFilterAssignee = ''; window.atFilterCat = '';
     renderSidebar();
     startRepeatTimer();  // auto-refresh recurring tasks every 5 min while logged in
-    if (window.lucide) lucide.createIcons();
     await navigateTo(currentRole === 'admin' ? 'adminDashboard' : 'internDashboard');
   } catch (e) {
     hideLoading();
@@ -629,15 +628,15 @@ function closeMobileSidebar() {
 }
 
 const internNav = [
-  {id:'internDashboard',  icon:'layout-dashboard', label:'Dashboard'},
-  {id:'internTasks',      icon:'check-square',     label:'Tasks',      badge:'sb-notif'},
-  {id:'internComplaints', icon:'message-circle',   label:'Complaints'},
+  {id:'internDashboard',  icon:'📊', label:'Dashboard'},
+  {id:'internTasks',      icon:'✅', label:'Tasks',         badge:'sb-notif'},
+  {id:'internComplaints', icon:'📣', label:'Complaints'},
 ];
 const adminNav = [
-  {id:'adminDashboard',  icon:'layout-dashboard', label:'Dashboard'},
-  {id:'adminTasks',      icon:'clipboard-list',   label:'Manage Tasks'},
-  {id:'adminComplaints', icon:'message-circle',   label:'Complaints',   badge:'sb-complaint'},
-  {id:'adminSettings',   icon:'shield-check',     label:'Settings 🔐'},
+  {id:'adminDashboard',  icon:'📊', label:'Dashboard'},
+  {id:'adminTasks',      icon:'📋', label:'Manage Tasks'},
+  {id:'adminComplaints', icon:'📣', label:'Complaints',    badge:'sb-complaint'},
+  {id:'adminSettings',   icon:'⚙️', label:'Settings 🔐'},
 ];
 
 function renderSidebar() {
@@ -645,16 +644,14 @@ function renderSidebar() {
   document.getElementById('sidebar').innerHTML =
     '<div class="sidebar-section">Menu</div>' +
     nav.map(n => `<div class="sidebar-item" id="nav-${n.id}" onclick="navigateTo('${n.id}');closeMobileSidebar();">
-      <span class="sidebar-icon"><i data-lucide="${n.icon}"></i></span>${n.label}
+      <span class="sidebar-icon">${n.icon}</span>${n.label}
       ${n.badge ? `<span class="sidebar-badge" id="${n.badge}"></span>` : ''}
     </div>`).join('') +
     `<button class="sidebar-logout" onclick="doLogout()">
-      <i data-lucide="log-out" style="width:15px;height:15px;flex-shrink:0;"></i>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Log Out
     </button>`;
   updateBadges();
-  // Initialise any newly injected Lucide icons
-  if (window.lucide) lucide.createIcons();
 }
 
 async function navigateTo(page) {
@@ -668,13 +665,6 @@ async function navigateTo(page) {
   const el = document.getElementById('nav-' + page); if (el) el.classList.add('active');
   const ca = document.getElementById('contentArea');
   ca.scrollTop = 0;
-
-  // PHASE-2 FIX-4: Show skeleton loader between navigations
-  showPageSkeleton(ca, page);
-
-  // Small delay lets the skeleton paint before the (sync) render runs
-  await new Promise(r => requestAnimationFrame(r));
-
   const map = {
     internDashboard:  () => renderInternDashboard(ca),
     internTasks:      () => renderInternTasks(ca),
@@ -688,36 +678,6 @@ async function navigateTo(page) {
   };
   if (map[page]) map[page]();
   updateBadges();
-  // Re-initialise Lucide icons after page render
-  if (window.lucide) lucide.createIcons();
-}
-
-// PHASE-2 FIX-4: Generate a context-appropriate skeleton for each page
-function showPageSkeleton(ca, page) {
-  const line  = (w='100%',h='14px') => `<div class="skeleton sk-line" style="width:${w};height:${h};margin-bottom:10px;"></div>`;
-  const card  = (inner) => `<div class="sk-card skeleton" style="margin-bottom:14px;">${inner}</div>`;
-  const row   = (cols) => `<div style="display:flex;gap:10px;margin-bottom:10px;">${cols.map(w=>`<div class="skeleton sk-line" style="flex:1;width:${w};height:14px;"></div>`).join('')}</div>`;
-
-  const dashSk = card(line('40%','22px') + row(['70%','30%']) + line() + line('80%'));
-  const gridSk = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;">${[1,2,3].map(()=>card(line('50%','10px')+line('60%','26px'))).join('')}</div>`;
-  const tableSk = card([1,2,3,4,5].map(()=>row(['20%','30%','20%','15%'])).join(''));
-
-  const skeletons = {
-    internDashboard:  dashSk + gridSk + card(line()),
-    adminDashboard:   gridSk + tableSk + card(line()),
-    internTasks:      card(line('30%','10px') + line() + line() + line('70%')),
-    adminTasks:       tableSk,
-    internComplaints: card(line() + line('60%')) + card(line() + line('60%')),
-    adminComplaints:  card(line() + line('60%')) + card(line() + line('60%')),
-    internNotifs:     card(line() + line('80%')) + card(line() + line('60%')),
-    adminNotifs:      card(line() + line('80%')) + card(line() + line('60%')),
-    adminSettings:    dashSk + card(line() + line('50%') + line('80%')),
-  };
-
-  const sk = skeletons[page];
-  if (sk) {
-    ca.innerHTML = `<div style="padding:4px 0;">${line('35%','22px')}${line('50%','12px')}<div style="margin-top:18px;">${sk}</div></div>`;
-  }
 }
 
 function updateBadges() {
@@ -774,7 +734,7 @@ function renderInternDashboard(ca) {
     <div class="grid-2" style="margin-bottom:12px;">
       <div class="points-big">
         <div><div class="points-label">Total Points</div><div class="points-number">${pts.toLocaleString()}</div></div>
-        <div style="font-size:32px;"><i data-lucide="trophy" style="width:36px;height:36px;color:#fff;opacity:.9;"></i></div>
+        <div style="font-size:32px;">🏆</div>
       </div>
       <div class="card" style="display:flex;flex-direction:column;justify-content:center;">
         <div class="section-title" style="margin-bottom:6px;">Obedience Score</div>
@@ -785,8 +745,8 @@ function renderInternDashboard(ca) {
     </div>
     <div class="section-title">Performance Dashboard</div>
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;">
-      ${[['graduation-cap','College',s.college||0],['building-2','Office',s.office||0],['rocket','Projects',s.project||0],['bug','Bugs',s.bugs||0],['lightbulb','Suggestions',s.suggestions||0]]
-        .map(([ic,lb,vl]) => `<div class="stat-card"><div class="stat-emoji"><i data-lucide="${ic}" style="width:18px;height:18px;color:var(--accent);"></i></div><div class="stat-label">${lb}</div><div class="stat-value">${vl.toLocaleString()}</div></div>`).join('')}
+      ${[['🎓','College',s.college||0],['🏢','Office',s.office||0],['🚀','Projects',s.project||0],['🐛','Bugs',s.bugs||0],['💡','Suggestions',s.suggestions||0]]
+        .map(([ic,lb,vl]) => `<div class="stat-card"><div class="stat-emoji">${ic}</div><div class="stat-label">${lb}</div><div class="stat-value">${vl.toLocaleString()}</div></div>`).join('')}
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
       <button class="btn btn-primary" onclick="openAddModal()">+ Add Entry</button>
@@ -841,13 +801,11 @@ function refreshContribInfo() {
   document.getElementById('catContribName').textContent = contrib ? contrib.name : 'No contributor assigned for this category';
 }
 
-async function refreshContribFromCode() {
-  const raw = document.getElementById('addCode').value.trim();
-  if (!raw) { refreshContribInfo(); return; }
-  const h = await sha256(raw);
-  const contrib = db.contributors.find(c => c.codeHash === h);
-  const el = document.getElementById('catContribName');
-  if (el) el.textContent = contrib ? contrib.name + ' ✓' : '—';
+function refreshContribFromCode() {
+  const code = document.getElementById('addCode').value.trim();
+  const contrib = db.contributors.find(c => c.code === code);
+  if (contrib) document.getElementById('catContribName').textContent = contrib.name + ' ✓';
+  else refreshContribInfo();
 }
 
 async function submitAdd() {
@@ -858,9 +816,7 @@ async function submitAdd() {
   const td = today(); const dk = td + '-' + catKey;
   s.dailyCounts = s.dailyCounts || {};
   if ((s.dailyCounts[dk] || 0) >= 3) { showToast('Daily limit (3) reached for this category', 'error'); return; }
-  // FIX-1: hash-based code verification — never compare plaintext
-  const codeHash = await sha256(code);
-  const contrib = db.contributors.find(c => c.codeHash === codeHash);
+  const contrib = db.contributors.find(c => c.code === code);
   if (!contrib) { showToast('Invalid contributor code', 'error'); return; }
   if (contrib.taskApprovalOnly) { showToast('This contributor is for task approval only, not entries. Use Send Request instead.', 'error'); return; }
   if (contrib.category && contrib.category !== cat && contrib.category !== 'All') {
@@ -868,15 +824,9 @@ async function submitAdd() {
   }
   s[catKey] = (s[catKey] || 0) + 1;
   s.dailyCounts[dk] = (s.dailyCounts[dk] || 0) + 1;
-  // FIX-5: validate & clamp all numeric inputs
-  const catPts = db.catPoints || DEF_POINTS;
-  let earned = Math.max(0, parseInt(catPts[cat]) || 5);
-  if (document.getElementById('addBonus').checked) {
-    const bonus = parseInt(document.getElementById('bonusPts').value) || 0;
-    earned += Math.max(0, Math.min(bonus, 500));
-  }
-  if (!isFinite(earned) || isNaN(earned)) earned = catPts[cat] || 5;
-  s.points = Math.max(0, (s.points || 0) + earned);
+  const catPts = db.catPoints || DEF_POINTS; let earned = catPts[cat] || 5;
+  if (document.getElementById('addBonus').checked) earned += parseInt(document.getElementById('bonusPts').value) || 0;
+  s.points = (s.points || 0) + earned;
   db.submissions[currentUser.id] = s;
   closeModal();
   await saveAndRefresh(cat + ' added! +' + earned + ' pts', 'internDashboard');
@@ -986,9 +936,8 @@ async function approveRequest(reqId) {
     s[catKey] = (s[catKey] || 0) + 1;
     // BUG-16 FIX: increment dailyCounts so subsequent real submissions hit the limit correctly
     s.dailyCounts[dk] = (s.dailyCounts[dk] || 0) + 1;
-    const _rawReqPts = (db.catPoints || DEF_POINTS)[req.category] || 5;
-    const pts = (isFinite(_rawReqPts) && !isNaN(_rawReqPts)) ? Math.max(0, Math.min(_rawReqPts, 9999)) : 5;
-    s.points = Math.max(0, (s.points || 0) + pts);
+    const pts = (db.catPoints || DEF_POINTS)[req.category] || 5;
+    s.points = (s.points || 0) + pts;
     db.submissions[iid] = s;
     if (!db.notifications[iid]) db.notifications[iid] = [];
     db.notifications[iid].unshift({ id:'n-'+Date.now(), msg:`✅ Your entry request for "${req.category}" was approved! +${pts} pts`, type:'request', read:false, date:today() });
@@ -1120,62 +1069,29 @@ function renderKanbanCard(task, id) {
   const done = isTaskDone(task.id, id);
   // BUG-05 FIX: sanitize all user-generated content before innerHTML
   const safeTitle = sanitize(task.title);
-  const pts  = task.points ? `<span class="kc-pts"><i data-lucide="star" style="width:10px;height:10px;display:inline;vertical-align:middle;"></i>${task.points}</span>` : '';
-  const rep  = task.templateId ? `<span style="font-size:10px;color:var(--text3);"><i data-lucide="repeat" style="width:10px;height:10px;display:inline;vertical-align:middle;"></i></span>` : '';
-
-  // PHASE-2 FIX-5: Overdue detection and visual treatment
-  let overdueClass = '';
-  let overdueBadge = '';
-  if (!done && task.dueDate) {
-    const todayStr = today();
-    if (task.dueDate < todayStr) {
-      // Calculate days overdue
-      const msOverdue = new Date(todayStr+'T00:00:00') - new Date(task.dueDate+'T00:00:00');
-      const daysOver = Math.round(msOverdue / 86400000);
-      overdueClass = daysOver >= 2 ? 'overdue-urgent' : 'overdue';
-      overdueBadge = `<span class="badge-overdue"><i data-lucide="alert-circle" style="width:9px;height:9px;display:inline;vertical-align:middle;"></i>${daysOver}d overdue</span>`;
-    }
-  }
-
-  // Due date badge — red if overdue, orange otherwise
-  let due = '';
-  if (task.dueDate && !done) {
-    const isOver = task.dueDate < today();
-    due = `<span class="badge ${isOver ? 'badge-red' : 'badge-orange'}" style="font-size:10px;">${sanitize(task.dueDate)}</span>`;
-  } else if (task.dueDate && done) {
-    due = `<span class="badge badge-orange" style="font-size:10px;">${sanitize(task.dueDate)}</span>`;
-  }
-
+  const pts  = task.points ? `<span class="kc-pts">⭐${task.points}</span>` : '';
+  const due  = task.dueDate ? `<span class="badge badge-orange" style="font-size:10px;">${sanitize(task.dueDate)}</span>` : '';
+  const rep  = task.templateId ? `<span style="font-size:10px;color:var(--text3);">🔁</span>` : '';
   let circle;
   if (done)
-    circle = `<div class="kc-circle done"><i data-lucide="check" style="width:11px;height:11px;"></i></div>`;
+    circle = `<div class="kc-circle done">✓</div>`;
   else if (task.approvalRequired && !task.isPersonal)
-    circle = `<div class="kc-circle approval" onclick="event.stopPropagation();openApprovalDlg('${task.id}','${id}')" title="Needs approval"><i data-lucide="lock" style="width:11px;height:11px;"></i></div>`;
+    circle = `<div class="kc-circle approval" onclick="event.stopPropagation();openApprovalDlg('${task.id}','${id}')" title="Needs approval">+</div>`;
   else
-    circle = `<div class="kc-circle" onclick="event.stopPropagation();completeTask('${task.id}','${id}')" onmouseenter="showCheckHover(this)" onmouseleave="clearCheckHover(this)" title="Complete"></div>`;
+    circle = `<div class="kc-circle" onclick="event.stopPropagation();completeTask('${task.id}','${id}')" onmouseenter="this.textContent='✓'" onmouseleave="this.textContent=''" title="Complete"></div>`;
 
   const actions = task.isPersonal && task.createdBy == id
-    ? `<button class="kc-action kc-del" onclick="event.stopPropagation();deletePersonalTask('${task.id}')" title="Delete"><i data-lucide="trash-2" style="width:13px;height:13px;"></i></button>`
+    ? `<button class="kc-action kc-del" onclick="event.stopPropagation();deletePersonalTask('${task.id}')" title="Delete">🗑</button>`
     : '';
 
-  return `<div class="kanban-card ${done ? 'completed' : ''} ${overdueClass}" onclick="openTaskDetail('${task.id}')">
+  return `<div class="kanban-card ${done ? 'completed' : ''}" onclick="openTaskDetail('${task.id}')">
     ${circle}
     <div class="kc-info">
       <div class="kc-title">${done ? '<s>' + safeTitle + '</s>' : safeTitle}</div>
-      <div class="kc-meta">${pts}${due}${rep}${overdueBadge}</div>
+      <div class="kc-meta">${pts}${due}${rep}</div>
     </div>
     ${actions}
   </div>`;
-}
-
-function showCheckHover(el) {
-  el.innerHTML = '<i data-lucide="check" style="width:11px;height:11px;"></i>';
-  el.style.borderColor = 'var(--accent)';
-  if (window.lucide) lucide.createIcons();
-}
-function clearCheckHover(el) {
-  el.innerHTML = '';
-  el.style.borderColor = '';
 }
 
 function setTF(f) { window.taskFilter = f; navigateTo('internTasks'); }
@@ -1271,9 +1187,7 @@ function openApprovalDlg(tid, iid) {
 async function submitApproval(tid, iid) {
   const code = document.getElementById('approvalCode').value.trim();
   const task  = db.tasks.find(t => t.id == tid);
-  // FIX-1: hash-based lookup — no plaintext comparison
-  const codeHash = await sha256(code);
-  const contrib = db.contributors.find(c => c.codeHash === codeHash);
+  const contrib = db.contributors.find(c => c.code === code);
   if (!contrib) { showToast('Invalid code', 'error'); return; }
   if (task.approvalContribId && contrib.id !== task.approvalContribId) {
     const ac = db.contributors.find(c => c.id === task.approvalContribId);
@@ -1281,11 +1195,7 @@ async function submitApproval(tid, iid) {
   }
   const key = tid + '-' + iid;
   db.taskCompletions[key] = {done: true};
-  // FIX-5: clamp task completion points
-  if (task.points) {
-    const _tp = Math.max(0, Math.min(task.points || 0, 9999));
-    db.submissions[iid].points = Math.max(0, (db.submissions[iid].points || 0) + _tp);
-  }
+  if (task.points) db.submissions[iid].points = (db.submissions[iid].points || 0) + task.points;
   if (!task.isPersonal) {
     const intern = INTERNS.find(i => i.id == iid);
     db.adminNotifications.unshift({id:'an-'+Date.now(), msg:`${intern?.name||'Intern'} completed (approved): "${task.title}"`, read:false, date:today(), internId:iid, taskId:tid});
@@ -1451,163 +1361,37 @@ async function submitComplaint() {
 // ╚══════════════════════════════════════════════════╝
 function renderAdminDashboard(ca) {
   const interns = INTERNS.filter(i => i.id !== 99);
-  const sid  = window.adminSelectedIntern || null; // null = overview mode
-  const sortKey = window.adminSort || 'points';
-  const sortDir = window.adminSortDir !== false; // true = desc
-
-  // Build per-intern data array for the overview table
-  const internData = interns.map(i => {
-    const s = db.submissions[i.id] || {};
-    const ob = getObedience(i.id);
-    const { total, done } = getObedienceCounts(i.id);
-    return { intern: i, pts: s.points || 0, ob, total, done, s };
-  });
-
-  // Sort
-  internData.sort((a, b) => {
-    let va = a[sortKey === 'name' ? 'intern' : sortKey];
-    let vb = b[sortKey === 'name' ? 'intern' : sortKey];
-    if (sortKey === 'name') { va = a.intern.name; vb = b.intern.name; }
-    if (typeof va === 'string') return sortDir ? vb.localeCompare(va) : va.localeCompare(vb);
-    return sortDir ? vb - va : va - vb;
-  });
-
-  // Summary stats
-  const totalPts = internData.reduce((acc, d) => acc + d.pts, 0);
-  const avgOb = Math.round(internData.reduce((acc, d) => acc + d.ob, 0) / interns.length);
-  const atRisk = internData.filter(d => d.ob < 30).length;
-  const top = internData[0];
-
-  function sortTh(label, key) {
-    const active = sortKey === key;
-    const arrow = active ? (sortDir ? ' ▼' : ' ▲') : '';
-    return `<th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="setAdminSort('${key}')">${label}${arrow}</th>`;
-  }
-
-  const tableRows = internData.map((d, idx) => {
-    const rank = idx + 1;
-    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
-    const obColor = d.ob >= 70 ? 'var(--accent3)' : d.ob >= 40 ? 'var(--yellow)' : '#e53e3e';
-    const rowSelected = sid === d.intern.id;
-    return `<tr class="admin-overview-row ${rowSelected ? 'selected' : ''}" onclick="selectAdminIntern(${d.intern.id})" style="cursor:pointer;">
-      <td style="font-weight:700;font-size:13px;">${medal}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">${sanitize(d.intern.name[0])}</div>
-          <div>
-            <div style="font-weight:600;font-size:13px;">${sanitize(d.intern.name)}</div>
-            <div style="font-size:11px;color:var(--text2);">@${sanitize(d.intern.username)}</div>
-          </div>
-        </div>
-      </td>
-      <td style="font-weight:800;font-size:15px;color:var(--accent);">${d.pts.toLocaleString()}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:7px;min-width:110px;">
-          <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
-            <div style="height:100%;width:${d.ob}%;background:${obColor};border-radius:3px;"></div>
-          </div>
-          <span style="font-size:12px;font-weight:700;color:${obColor};width:32px;">${d.ob}%</span>
-        </div>
-      </td>
-      <td style="font-size:12px;color:var(--text2);text-align:center;">${d.done}/${d.total}</td>
-      <td style="text-align:center;">
-        ${d.ob < 30 ? '<span class="badge badge-red" style="font-size:10px;">⚠ At Risk</span>' : d.ob >= 80 ? '<span class="badge badge-green" style="font-size:10px;">★ Star</span>' : ''}
-      </td>
-    </tr>`;
-  }).join('');
-
-  // Detail panel for selected intern (shown below table when one is selected)
-  let detailHtml = '';
-  if (sid) {
-    const d = internData.find(d => d.intern.id === sid);
-    if (d) {
-      const { intern, pts, ob, total, done, s } = d;
-      detailHtml = `
-        <div style="margin-top:20px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
-            <div class="section-title" style="margin:0;">Detail: ${sanitize(intern.name)}</div>
-            <button class="btn btn-secondary btn-sm" onclick="window.adminSelectedIntern=null;navigateTo('adminDashboard')">✕ Close Detail</button>
-          </div>
-          <div class="card" style="margin-bottom:12px;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-              <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;">${sanitize(intern.name[0])}</div>
-              <div style="flex:1;"><div style="font-weight:700;font-size:15px;">${sanitize(intern.name)}</div><div style="color:var(--text2);font-size:12px;">@${sanitize(intern.username)}</div></div>
-              <div style="text-align:right;"><div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;">Points</div><div style="font-size:26px;font-weight:800;color:var(--accent);">${pts.toLocaleString()}</div></div>
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:10px;">
-              ${[['graduation-cap','College',s.college||0],['building-2','Office',s.office||0],['rocket','Projects',s.project||0],['bug','Bugs',s.bugs||0],['lightbulb','Suggestions',s.suggestions||0]]
-                .map(([ic,lb,vl]) => `<div class="stat-card"><div class="stat-emoji"><i data-lucide="${ic}" style="width:18px;height:18px;color:var(--accent);"></i></div><div class="stat-label">${lb}</div><div class="stat-value" style="font-size:20px;">${vl.toLocaleString()}</div></div>`).join('')}
-            </div>
-            <div><div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;margin-bottom:3px;">Obedience: ${ob}% — ${done}/${total} tasks (last 30 days)</div><div class="obedience-bar"><div class="obedience-fill" style="width:${ob}%"></div></div></div>
-          </div>
-          <div class="section-title">Task Overview (Last 30 Days)</div>
-          ${renderAdminTaskOverview(sid)}
-        </div>`;
-    }
-  }
-
+  const sid  = window.adminSelectedIntern || interns[0].id;
+  const intern = interns.find(i => i.id === sid);
+  const s = db.submissions[sid] || {}; const pts = s.points || 0; const ob = getObedience(sid);
+  const { total: taskCount, done: doneCount } = getObedienceCounts(sid);
   ca.innerHTML = `<div>
     <div class="page-title">Admin Dashboard</div>
-    <div class="page-sub">All-intern performance overview — click any row to drill down</div>
-
-    <!-- Summary stat bar -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
-      <div class="stat-card" style="background:linear-gradient(135deg,var(--accent),#ff8c5a);border:none;">
-        <div class="stat-label" style="color:rgba(255,255,255,.8);">Total Points (All)</div>
-        <div class="stat-value" style="color:#fff;">${totalPts.toLocaleString()}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Avg Obedience</div>
-        <div class="stat-value" style="color:${avgOb>=70?'var(--accent3)':avgOb>=40?'var(--yellow)':'#e53e3e'};">${avgOb}%</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Top Performer</div>
-        <div style="font-size:13px;font-weight:700;margin-top:4px;">${top ? sanitize(top.intern.name) : '—'}</div>
-        <div style="font-size:11px;color:var(--text2);">${top ? top.pts.toLocaleString()+' pts' : ''}</div>
-      </div>
-      <div class="stat-card" style="${atRisk>0?'border-color:#fca5a5;background:#fff5f5;':''}">
-        <div class="stat-label" style="${atRisk>0?'color:#e53e3e;':''}">At Risk (&lt;30% obedience)</div>
-        <div class="stat-value" style="${atRisk>0?'color:#e53e3e;':''}">${atRisk}</div>
-      </div>
+    <div class="page-sub">Monitor intern performance</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);">Viewing:</label>
+      <select onchange="selectAdminIntern(this.value)" style="border:1.5px solid var(--border);border-radius:8px;padding:7px 13px;font-size:14px;font-family:inherit;color:var(--text);outline:none;background:#fff;">
+        ${interns.map(i => `<option value="${i.id}" ${i.id === sid ? 'selected' : ''}>${sanitize(i.name)}</option>`).join('')}
+      </select>
     </div>
-
-    <!-- All-interns overview table -->
-    <div class="card" style="padding:0;overflow:hidden;margin-bottom:18px;">
-      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-        <div style="font-weight:700;font-size:14px;">All Interns — ${interns.length} total</div>
-        <div style="font-size:11px;color:var(--text2);">Click a row to see full detail · Click header to sort</div>
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;">${sanitize(intern.name[0])}</div>
+        <div style="flex:1;"><div style="font-weight:700;font-size:15px;">${sanitize(intern.name)}</div><div style="color:var(--text2);font-size:12px;">@${sanitize(intern.username)}</div></div>
+        <!-- BUG-24 FIX: toLocaleString for thousands separator -->
+        <div style="text-align:right;"><div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;">Points</div><div style="font-size:26px;font-weight:800;color:var(--accent);">${pts.toLocaleString()}</div></div>
       </div>
-      <div style="overflow-x:auto;">
-        <table class="table" style="width:100%;">
-          <thead>
-            <tr>
-              ${sortTh('#','rank_placeholder')}
-              ${sortTh('Name','name')}
-              ${sortTh('Points','pts')}
-              ${sortTh('Obedience','ob')}
-              <th style="text-align:center;">Tasks Done</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>${tableRows}</tbody>
-        </table>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:10px;">
+        ${[['🎓','College',s.college||0],['🏢','Office',s.office||0],['🚀','Projects',s.project||0],['🐛','Bugs',s.bugs||0],['💡','Suggestions',s.suggestions||0]]
+          .map(([ic,lb,vl]) => `<div class="stat-card"><div class="stat-emoji">${ic}</div><div class="stat-label">${lb}</div><div class="stat-value" style="font-size:20px;">${vl.toLocaleString()}</div></div>`).join('')}
       </div>
+      <div><div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;margin-bottom:3px;">Obedience: ${ob}% — ${doneCount}/${taskCount} tasks (last 30 days)</div><div class="obedience-bar"><div class="obedience-fill" style="width:${ob}%"></div></div></div>
     </div>
+    <div class="section-title">Task Overview (Last 30 Days)</div>
+    ${renderAdminTaskOverview(sid)}
 
-    ${detailHtml}
     ${renderRecurringDashboard()}
   </div>`;
-}
-
-function setAdminSort(key) {
-  if (key === 'rank_placeholder') return; // rank column not sortable
-  if (window.adminSort === key) {
-    window.adminSortDir = !window.adminSortDir;
-  } else {
-    window.adminSort = key;
-    window.adminSortDir = true; // desc by default
-  }
-  navigateTo('adminDashboard');
 }
 
 // ── Recurring Tasks quick-overview panel shown at the bottom of Admin Dashboard ──
@@ -1670,15 +1454,7 @@ function renderAdminTaskOverview(sid) {
     }).join('')}</div>`}`;
 }
 
-function selectAdminIntern(id) {
-  // Toggle: clicking the already-selected row collapses it
-  if (window.adminSelectedIntern === parseInt(id)) {
-    window.adminSelectedIntern = null;
-  } else {
-    window.adminSelectedIntern = parseInt(id);
-  }
-  navigateTo('adminDashboard');
-}
+function selectAdminIntern(id) { window.adminSelectedIntern = parseInt(id); navigateTo('adminDashboard'); }
 function setATF(f) { window.adminTaskFilter = f; navigateTo('adminDashboard'); }
 
 // ╔══════════════════════════════════════════════════╗
@@ -1888,9 +1664,7 @@ async function saveEditTask(tid) {
   task.description = document.getElementById('etDesc').value;
   task.assignedTo  = newAssignedTo;
   task.category    = document.getElementById('etCat').value;
-  // FIX-5: validate & clamp edit task points
-  const _rawEP = parseInt(document.getElementById('etPoints').value);
-  task.points = (isFinite(_rawEP) && !isNaN(_rawEP)) ? Math.max(0, Math.min(_rawEP, 9999)) : 0;
+  task.points      = parseInt(document.getElementById('etPoints').value) || 0;
   task.dueDate     = document.getElementById('etDue').value;
   task.approvalRequired = document.getElementById('etApproval').checked;
   task.approvalContribId = _approvalContribId;
@@ -2253,13 +2027,10 @@ async function saveTask() {
   const selectedIds = [...document.querySelectorAll('.tInternCb:checked')].map(cb => parseInt(cb.value));
   if (selectedIds.length === 0) { showToast('Select at least one intern', 'error'); return; }
   const hasRepeat = !!_repeatConfig;
-  // FIX-5: validate & clamp task points
-  const _rawPts = parseInt(document.getElementById('tPoints').value);
-  const _validPts = (isFinite(_rawPts) && !isNaN(_rawPts)) ? Math.max(0, Math.min(_rawPts, 9999)) : 0;
   const baseData = {
     title, description: document.getElementById('tDesc').value,
     category: document.getElementById('tCat').value,
-    points: _validPts,
+    points: parseInt(document.getElementById('tPoints').value) || 0,
     dueDate: document.getElementById('tDue').value, repeat: _repeatConfig,
     approvalRequired, approvalContribId: _approvalContribId,
     isPersonal: false, createdDate: today(), createdAt: Date.now(),
@@ -2394,20 +2165,6 @@ function renderAdminSettings(ca) {
     <div class="page-title">Settings</div>
     <div class="page-sub">Configure points, contributors, export and reset</div>
 
-    <!-- PHASE-1 FIX-2: Firebase Security Rules reminder -->
-    <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:14px 18px;margin-bottom:18px;display:flex;gap:12px;align-items:flex-start;">
-      <i data-lucide="shield-alert" style="width:20px;height:20px;color:#b45309;flex-shrink:0;margin-top:2px;"></i>
-      <div>
-        <div style="font-weight:700;font-size:13px;color:#92400e;margin-bottom:4px;">Firebase Security Rules Required</div>
-        <div style="font-size:12px;color:#78350f;line-height:1.6;">
-          Your database may be publicly readable without authentication. Go to 
-          <strong>Firebase Console → Realtime Database → Rules</strong> and set:<br>
-          <code style="background:#fef3c7;padding:2px 6px;border-radius:4px;font-size:11px;">".read": "auth != null", ".write": "auth != null"</code><br>
-          This ensures only authenticated users can read/write your data.
-        </div>
-      </div>
-    </div>
-
     <div class="section-title">Category Points</div>
     <div class="card" style="margin-bottom:16px;">
       <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">Set default points per submission category</div>
@@ -2465,11 +2222,7 @@ async function saveCatPoints() {
   if (!db.catPoints) db.catPoints = {};
   Object.keys(DEF_POINTS).forEach(cat => {
     const el = document.getElementById('cp-' + cat.replace(/\s+/g,'_'));
-    if (el) {
-      // FIX-5: validate & clamp category points
-      const v = parseInt(el.value);
-      db.catPoints[cat] = (isFinite(v) && !isNaN(v)) ? Math.max(0, Math.min(v, 9999)) : (DEF_POINTS[cat] || 5);
-    }
+    if (el) db.catPoints[cat] = parseInt(el.value) || 0;
   });
   await saveAndRefresh('Category points saved!', 'adminSettings');
 }
@@ -2513,12 +2266,10 @@ async function saveContributor() {
   const name = document.getElementById('cName').value.trim();
   const code = document.getElementById('cCode').value.trim();
   if (!name || !code) { showToast('Name and code required', 'error'); return; }
-  // FIX-1: store sha256 of code — plaintext never reaches Firebase
-  const codeHash = await sha256(code);
-  if (db.contributors.find(c => c.codeHash === codeHash)) { showToast('Code already exists', 'error'); return; }
+  if (db.contributors.find(c => c.code === code)) { showToast('Code already exists', 'error'); return; }
   const taskApprovalOnly = document.getElementById('cTaskOnly')?.checked || false;
   const category = taskApprovalOnly ? null : (document.getElementById('cCat')?.value || 'All');
-  db.contributors.push({id:'contrib-'+Date.now(), name, codeHash, category, taskApprovalOnly});
+  db.contributors.push({id:'contrib-'+Date.now(), name, code, category, taskApprovalOnly});
   closeModal();
   await saveAndRefresh('Contributor added!', 'adminSettings');
 }
@@ -2568,13 +2319,9 @@ async function updateContrib(id) {
   const taskApprovalOnly = document.getElementById('ecTaskOnly')?.checked || false;
   const category = taskApprovalOnly ? null : (document.getElementById('ecCat')?.value || 'All');
   const updated = {...db.contributors[idx], name, category, taskApprovalOnly};
-  // Remove legacy plaintext field if present (migration)
-  delete updated.code;
   if (newCode) {
-    // FIX-1: hash new code — plaintext never stored
-    const newHash = await sha256(newCode);
-    if (db.contributors.find(c => c.codeHash === newHash && c.id !== id)) { showToast('Code already used', 'error'); return; }
-    updated.codeHash = newHash;
+    if (db.contributors.find(c => c.code === newCode && c.id !== id)) { showToast('Code already used', 'error'); return; }
+    updated.code = newCode;
   }
   db.contributors[idx] = updated;
   closeModal();
@@ -2714,53 +2461,17 @@ function undoTaskNow() {
 function togglePwVisibility() {
   const inp = document.getElementById('loginPass');
   const btn = document.getElementById('pwToggleBtn');
-  const icon = document.getElementById('pwToggleIcon');
   if (!inp) return;
   if (inp.type === 'password') {
     inp.type = 'text';
-    if (icon) { icon.setAttribute('data-lucide','eye-off'); lucide.createIcons(); }
+    if (btn) btn.textContent = '🙈';
   } else {
     inp.type = 'password';
-    if (icon) { icon.setAttribute('data-lucide','eye'); lucide.createIcons(); }
+    if (btn) btn.textContent = '👁';
   }
-}
-
-// PHASE-2 FIX-3: Dark mode toggle
-function toggleDarkMode() {
-  const html = document.documentElement;
-  const isDark = html.getAttribute('data-theme') === 'dark';
-  const next = isDark ? 'light' : 'dark';
-  html.setAttribute('data-theme', next);
-  try { localStorage.setItem('txp_theme', next); } catch(e) {}
-  // Update toggle icon
-  const btn = document.getElementById('themeToggle');
-  if (btn) {
-    const i = btn.querySelector('i');
-    if (i) { i.setAttribute('data-lucide', next === 'dark' ? 'sun' : 'moon'); lucide.createIcons(); }
-  }
-}
-
-// Restore saved theme on load (called before render)
-function restoreTheme() {
-  try {
-    const saved = localStorage.getItem('txp_theme');
-    if (saved === 'dark') {
-      document.documentElement.setAttribute('data-theme','dark');
-      // Update icon after DOM ready
-      setTimeout(() => {
-        const btn = document.getElementById('themeToggle');
-        if (btn) {
-          const i = btn.querySelector('i');
-          if (i) { i.setAttribute('data-lucide','sun'); if (window.lucide) lucide.createIcons(); }
-        }
-      }, 100);
-    }
-  } catch(e) {}
 }
 
 window.addEventListener('load', async () => {
-  // PHASE-2 FIX-3: Restore saved theme before anything renders
-  restoreTheme();
   // ── RESTORE SESSION: if a valid session exists, skip the login screen ──────
   // The user only gets shown the login screen if they explicitly logged out,
   // or if this is their first ever visit. Closing the app / refreshing keeps
@@ -2788,7 +2499,6 @@ window.addEventListener('load', async () => {
           window.adminSelectedIntern = null; window.atFilterAssignee = ''; window.atFilterCat = '';
           renderSidebar();
           startRepeatTimer();
-          if (window.lucide) lucide.createIcons();
           await navigateTo(currentRole === 'admin' ? 'adminDashboard' : 'internDashboard');
           restored = true;
         } catch(e) {
@@ -2804,7 +2514,6 @@ window.addEventListener('load', async () => {
     setTimeout(() => {
       document.getElementById('loadingOverlay').classList.add('hidden');
       document.getElementById('loginScreen').classList.add('active');
-      if (window.lucide) lucide.createIcons();
     }, 800);
   }
 });
